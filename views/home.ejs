@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>GWMS Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="dashboard-layout">
+
+    <header class="dash-header">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo-small">
+                    <div class="logo-icon"><span class="material-symbols-outlined">music_note</span></div>
+                    <span>GWMS</span>
+                </div>
+                <nav class="nav-menu">
+                    <a href="/home" class="nav-item active">Overview</a>
+                    <a href="#" class="nav-item">Order</a>
+                    <a href="#" class="nav-item">History</a>
+                    <a href="#" class="nav-item">Inventory</a>
+                </nav>
+            </div>
+            
+            <div class="nav-right">
+                <div class="search-box">
+                    <span class="material-symbols-outlined icon">search</span>
+                    <input type="text" placeholder="Search SKU, Brand...">
+                </div>
+                <div class="profile-section">
+                    <div class="avatar"><%= user.name.charAt(0) %></div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 14px;"><%= user.name %></div>
+                        <div style="color: var(--primary); font-size: 12px;"><%= user.role %></div>
+                    </div>
+                    <a href="/" style="color: var(--text-muted); text-decoration: none; margin-left: 10px;">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h2>Dashboard Overview</h2>
+                <p>Welcome back, <%= user.name.split(' ')[0] %>. Here's what's happening in the warehouse today.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn-outline">
+                    <span class="material-symbols-outlined">download</span> Export Report
+                </button>
+                <button class="btn-primary">
+                    <span class="material-symbols-outlined">add</span> New Inbound
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: var(--success-bg); color: var(--success);">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                    </div>
+                    <span class="badge success"><span class="material-symbols-outlined" style="font-size: 14px;">trending_up</span> +2.4%</span>
+                </div>
+                <div class="stat-title">Total Stock</div>
+                <div class="stat-value">1,250</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: var(--danger-bg); color: var(--danger);">
+                        <span class="material-symbols-outlined">warning</span>
+                    </div>
+                    <span class="badge danger">Action Needed</span>
+                </div>
+                <div class="stat-title">Low Stock Alerts</div>
+                <div class="stat-value">5</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: var(--info-bg); color: var(--info);">
+                        <span class="material-symbols-outlined">pending_actions</span>
+                    </div>
+                </div>
+                <div class="stat-title">Pending Approvals</div>
+                <div class="stat-value">3</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning);">
+                        <span class="material-symbols-outlined">history</span>
+                    </div>
+                    <span class="badge warning">> 90 Days</span>
+                </div>
+                <div class="stat-title">Aging Stock</div>
+                <div class="stat-value">12</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Recent Activity</h3>
+                <a href="#" style="color: var(--primary); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                    View Full History <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                </a>
+            </div>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Action</th>
+                        <th>Staff</th>
+                        <th>Timestamp</th>
+                        <th style="text-align: right;">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge success">Received</span></td>
+                        <td style="font-weight: 600;">Inbound #3024</td>
+                        <td>
+                            <div class="staff-cell">
+                                <div class="staff-avatar">M</div> Michael T.
+                            </div>
+                        </td>
+                        <td style="color: var(--text-muted);">Just now</td>
+                        <td style="text-align: right; color: var(--text-muted);">Fender Stratocaster (x5)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge info">Shipped</span></td>
+                        <td style="font-weight: 600;">Order #8821</td>
+                        <td>
+                            <div class="staff-cell">
+                                <div class="staff-avatar">S</div> Sarah J.
+                            </div>
+                        </td>
+                        <td style="color: var(--text-muted);">15 mins ago</td>
+                        <td style="text-align: right; color: var(--text-muted);">Gibson Les Paul Std</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge warning">Audit</span></td>
+                        <td style="font-weight: 600;">Zone B Count</td>
+                        <td>
+                            <div class="staff-cell">
+                                <div class="staff-avatar">A</div> Alex G.
+                            </div>
+                        </td>
+                        <td style="color: var(--text-muted);">45 mins ago</td>
+                        <td style="text-align: right; color: var(--text-muted);">Discrepancy: -2 Units</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>
