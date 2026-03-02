@@ -80,6 +80,64 @@ app.get('/home', (req, res) => {
     }
     res.render('home', { user: req.session.user });
 });
+const requireAdmin = (req, res, next) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/home'); // ถ้าไม่ใช่ admin ให้เด้งกลับไปหน้า home
+    }
+    next();
+};
+
+//หน้า Admin Tool
+app.get('/admintool', requireAdmin, (req, res) => {
+    // ดึงข้อมูลผู้ใช้ทั้งหมด (ไม่ดึงรหัสผ่านเพื่อความปลอดภัย)
+    const sql = `SELECT id, username, name, role FROM users`;
+    
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
+        }
+        res.render('admintool', { 
+            dbUsers: rows, 
+            user: req.session.user 
+        });
+    });
+});
+
+//Route เพิ่ม User
+app.post('/admintool/add', requireAdmin, (req, res) => {
+    const { username, password, name, role } = req.body;
+    
+    const sql = `INSERT INTO users (username, password, name, role) VALUES (?, ?, ?, ?)`;
+    db.run(sql, [username, password, name, role], function(err) {
+        if (err) {
+            console.error(err.message);
+            // ในของจริงอาจจะส่งแจ้งเตือนกลับไปว่า Username ซ้ำ
+        }
+        res.redirect('/admintool');
+    });
+});
+
+//Route ลบ User 
+app.post('/admintool/delete/:id', requireAdmin, (req, res) => {
+    const sql = `DELETE FROM users WHERE id = ?`;
+    db.run(sql, req.params.id, function(err) {
+        if (err) console.error(err.message);
+        res.redirect('/admintool');
+    });
+});
+
+//Route Update User 
+app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
+    const { name, role } = req.body;
+    const sql = `UPDATE users SET name = ?, role = ? WHERE id = ?`;
+    
+    db.run(sql, [name, role, req.params.id], function(err) {
+        if (err) console.error(err.message);
+        res.redirect('/admintool');
+    });
+});
+
 
 app.get('/logout', (req, res) => {
     req.session.destroy();

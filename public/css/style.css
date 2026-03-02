@@ -241,6 +241,7 @@ body {
     background: var(--surface-2);
     padding: 5px;
     border-radius: 12px;
+    margin: 15px;
     gap: 5px;
 }
 

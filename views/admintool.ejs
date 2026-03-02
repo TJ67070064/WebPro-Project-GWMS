@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GWMS AdminTools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* สไตล์เพิ่มเติมสำหรับตารางและ Modal ให้อยู่ในโทนเดียวกับเว็บคุณ */
+        .admin-container { padding: 40px; max-width: 1200px; margin: 0 auto; color: #fff; }
+        .header-action { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .btn-primary { background-color: var(--primary, #f5b027); color: #1a1814; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif;}
+        .btn-primary:hover { opacity: 0.9; }
+        
+        .data-card { background: #26221d; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .data-card-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 700; display: flex; align-items: center; gap: 10px;}
+        
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .data-table th { padding: 16px 20px; color: rgba(255,255,255,0.5); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .data-table td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .data-table tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .role-badge { background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #26221d; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 8px; color: rgba(255,255,255,0.7); font-size: 14px; }
+        .form-control { width: 100%; padding: 10px; background: #1a1814; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; font-family: 'Inter', sans-serif;}
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+        .btn-text { background: none; color: rgba(255,255,255,0.6); border: none; cursor: pointer; padding: 10px; font-family: 'Inter', sans-serif;}
+        .btn-text:hover { color: #fff; }
+    </style>
+</head>
+
+<body class="dashboard-layout">
+
+    <header class="dash-header">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo-small">
+                    <div class="logo-icon"><span class="material-symbols-outlined">music_note</span></div>
+                    <span>GWMS</span>
+                </div>
+                <nav class="nav-menu">
+                    <a href="/home" class="nav-item">Overview</a>
+                    <a href="#" class="nav-item">Order</a>
+                    <a href="#" class="nav-item">History</a>
+                    <a href="#" class="nav-item">Inventory</a>
+                    <% if (user.role==='admin' ) { %>
+                        <a href="/admintool" class="nav-item active" style="color: var(--primary);">
+                            AdminTools <span style="font-size: 10px; background: rgba(255,0,0,0.2); color: red; padding: 2px 4px; border-radius: 4px;">Dev Only</span>
+                        </a>
+                    <% } %>
+                </nav>
+            </div>
+
+            <div class="nav-right">
+                <div class="search-box">
+                    <span class="material-symbols-outlined icon">search</span>
+                    <input type="text" placeholder="Search SKU, Brand...">
+                </div>
+                <div class="profile-section">
+                    <div class="avatar">
+                        <%= user.name.charAt(0) %>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 14px;">
+                            <%= user.name %>
+                        </div>
+                        <div style="color: var(--primary); font-size: 12px;">
+                            <%= user.role %>
+                        </div>
+                    </div>
+                    <a href="/logout" style="color: var(--text-muted); text-decoration: none; margin-left: 10px;">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        
+        <div class="header-action">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">User Management & Audit</h1>
+                <p style="color: rgba(255,255,255,0.5); font-size: 14px;">Manage system access roles and monitor critical security events.</p>
+            </div>
+            <button onclick="openModal('addUserModal')" class="btn-primary">
+                <span class="material-symbols-outlined" style="font-size: 20px;">person_add</span>
+                Add User
+            </button>
+        </div>
+
+        <div class="data-card">
+            <div class="data-card-header">
+                <span class="material-symbols-outlined" style="color: var(--primary);">group</span>
+                System Users
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof dbUsers !== 'undefined' && dbUsers.length > 0) { %>
+                        <% dbUsers.forEach(function(u) { %>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;"><%= u.name %></div>
+                            </td>
+                            <td style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                                @<%= u.username %>
+                            </td>
+                            <td>
+                                <span class="role-badge"><%= u.role %></span>
+                            </td>
+                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+                                <button onclick="openEditModal('<%= u.id %>', '<%= u.name %>', '<%= u.role %>')" style="background:none; border:none; color:rgba(255,255,255,0.6); cursor:pointer;" title="Edit">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </button>
+                                
+                                <form action="/admintool/delete/<%= u.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete @<%= u.username %>?');" style="display:inline;">
+                                    <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Delete">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: rgba(255,255,255,0.5); padding: 30px;">
+                                No users found in database.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="addUserModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="margin-bottom: 20px; font-size: 20px;">Add New User</h2>
+            <form action="/admintool/add" method="POST">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select name="role" class="form-control">
+                        <option value="admin">Admin</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('addUserModal')" class="btn-text">Cancel</button>
+                    <button type="submit" class="btn-primary">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editUserModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="margin-bottom: 20px; font-size: 20px;">Edit User</h2>
+            <form id="editForm" method="POST">
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" id="editName" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="editRole" name="role" class="form-control">
+                        <option value="admin">Admin</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('editUserModal')" class="btn-text">Cancel</button>
+                    <button type="submit" class="btn-primary">Update User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ฟังก์ชันเปิด-ปิด Modal
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // ฟังก์ชันดึงข้อมูลเก่ามาแสดงใน Modal Edit ก่อนอัปเดต
+        function openEditModal(id, name, role) {
+            document.getElementById('editForm').action = '/admintool/edit/' + id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editRole').value = role;
+            openModal('editUserModal');
+        }
+
+        // ปิด Modal เมื่อคลิกพื้นที่ว่างด้านนอกกล่อง
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
