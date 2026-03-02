@@ -1,6 +1,8 @@
+const { error } = require('console');
 const express = require('express');
 const app = express();
 const path = require('path');
+const PORT = 3000;
 
 // ตั้งค่าให้ Express รู้จักโฟลเดอร์ public สำหรับเรียกใช้ไฟล์ CSS และรูปภาพ
 app.use(express.static(path.join(__dirname, 'public')));
@@ -17,18 +19,28 @@ app.get('/', (req, res) => {
     res.render('login'); 
 });
 
+const db = require('./database');
+
 // Route สำหรับตรวจสอบข้อมูล Login
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     
-    // จำลองการตรวจสอบสิทธิ์ (สามารถเปลี่ยนเป็นเช็คกับ Database ได้ภายหลัง)
-    if (username === 'admin' && password === '1234') {
-        // ถ้ารหัสผ่านถูกต้อง ให้พาไปหน้า Dashboard (ที่กำลังจะสร้าง)
-        res.redirect('/home'); 
-    } else {
-        // ถ้าผิดพลาด ให้ส่งข้อความ error กลับไปแสดงผลที่หน้าเดิม
-        res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง' });
-    }
+    const sql = `SELECT * FROM users WHERE username = ? AND password =?`;
+
+    db.get(sql, [username,password], (error, row) => {
+        if(error){
+            console.error(error);
+            return res.render('login',{error: 'ระบบเกิดข้อผิดพลาด'});
+        }
+
+        if (row) {
+            //login ได้
+            res.redirect('/home');
+        } else{
+            //login ไม่ได้
+            res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง'});
+        }
+    });
 });
 
 
@@ -46,7 +58,6 @@ app.get('/home', (req, res) => {
 
 
 // กำหนด Port และ Start Server
-const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`GWMS Server started at http://localhost:${PORT}`);
 });
