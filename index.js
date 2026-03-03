@@ -1,8 +1,9 @@
-const { error } = require('console');
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const PORT = 3000;
+const sqlite3 = require('sqlite3').verbose(); // 1. เรียกใช้ sqlite3
+
+const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
@@ -46,47 +47,12 @@ app.get('/', (req, res) => {
     res.render('login'); 
 });
 
-<<<<<<< HEAD
-const db = require('./database');
-
-// Route สำหรับตรวจสอบข้อมูล Login
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    
-    const sql = `SELECT * FROM users WHERE username = ? AND password =?`;
-
-    db.get(sql, [username,password], (error, row) => {
-        if(error){
-            console.error(error);
-            return res.render('login',{error: 'ระบบเกิดข้อผิดพลาด'});
-        }
-
-        if (row) {
-            //login ได้
-            res.redirect('/home');
-        } else{
-            //login ไม่ได้
-            res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง'});
-        }
-    });
-});
-
-
-// สร้าง Route สำหรับหน้า Dashboard (home)
-app.get('/home', (req, res) => {
-    // จำลองข้อมูลผู้ใช้ที่จะส่งไปแสดงผลบนหน้า EJS
-    const userData = {
-        name: 'Admin',
-        role: 'Administrator'
-    };
-=======
 // 4. แก้ไข Route Login ให้ดึงข้อมูลจาก Database แทน Array
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     
     // ค้นหาข้อมูลผู้ใช้จากฐานข้อมูล SQLite
     const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
->>>>>>> origin/main
     
     db.get(sql, [username, password], (err, row) => {
         if (err) {
@@ -179,16 +145,12 @@ app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
 });
 
 
-<<<<<<< HEAD
-// กำหนด Port และ Start Server
-=======
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
 });
 
 const PORT = 3000;
->>>>>>> origin/main
 app.listen(PORT, () => {
     console.log(`GWMS Server started at http://localhost:${PORT}`);
 });
