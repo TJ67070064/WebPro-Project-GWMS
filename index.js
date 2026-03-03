@@ -85,6 +85,18 @@ app.get('/home', (req, res) => {
     });
 });
 
+app.get('/history', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/');
+    }
+    // เพิ่ม currentPage: 'home' เพื่อให้ Navbar รู้ว่าต้องไฮไลท์เมนูไหน
+    res.render('history', { 
+        user: req.session.user,
+        currentPage: 'history' 
+    });
+});
+
+
 const requireAdmin = (req, res, next) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.redirect('/home'); // ถ้าไม่ใช่ admin ให้เด้งกลับไปหน้า home
