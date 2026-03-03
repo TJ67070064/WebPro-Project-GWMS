@@ -36,7 +36,7 @@ const db = new sqlite3.Database('./user.db', (err) => {
 
             // ใส่ข้อมูลจำลองลงไปใน Database (ใช้ INSERT OR IGNORE เพื่อป้องกันการใส่ข้อมูลซ้ำเวลาเปิดเซิร์ฟเวอร์ใหม่)
             const insertData = `INSERT OR IGNORE INTO users (username, password, name, role) VALUES 
-                ('admin', '1234', 'Atom', 'admin'),
+                ('admin', '1234', 'TJ', 'admin'),
                 ('staff1', '1234', 'Somchai', 'staff')`;
             db.run(insertData);
         });
@@ -78,8 +78,13 @@ app.get('/home', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/');
     }
-    res.render('home', { user: req.session.user });
+    // เพิ่ม currentPage: 'home' เพื่อให้ Navbar รู้ว่าต้องไฮไลท์เมนูไหน
+    res.render('home', { 
+        user: req.session.user,
+        currentPage: 'home' 
+    });
 });
+
 const requireAdmin = (req, res, next) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.redirect('/home'); // ถ้าไม่ใช่ admin ให้เด้งกลับไปหน้า home
@@ -89,7 +94,6 @@ const requireAdmin = (req, res, next) => {
 
 //หน้า Admin Tool
 app.get('/admintool', requireAdmin, (req, res) => {
-    // ดึงข้อมูลผู้ใช้ทั้งหมด (ไม่ดึงรหัสผ่านเพื่อความปลอดภัย)
     const sql = `SELECT id, username, name, role FROM users`;
     
     db.all(sql, [], (err, rows) => {
@@ -97,9 +101,11 @@ app.get('/admintool', requireAdmin, (req, res) => {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
+        // เพิ่ม currentPage: 'admin' ตรงนี้ด้วยครับ
         res.render('admintool', { 
             dbUsers: rows, 
-            user: req.session.user 
+            user: req.session.user,
+            currentPage: 'admin'
         });
     });
 });
