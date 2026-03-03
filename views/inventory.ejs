@@ -11,56 +11,9 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 
-<body class="dashboard-page">
+<body class="dashboard-layout">
 
-    <header class="dash-header">
-        <div class="nav-container">
-            <div class="nav-left">
-                <div class="logo-small">
-                    <div class="logo-icon"><span class="material-symbols-outlined">warehouse</span></div>
-                    GWMS
-                </div>
-                
-                <nav class="nav-menu">
-                    <a href="/home" class="nav-item <%= currentPage === 'home' ? 'active' : '' %>">Overview</a>
-                    <a href="#" class="nav-item">Order</a>
-                    <a href="#" class="nav-item">History</a>
-                    
-                    <% if (user && user.role === 'admin') { %>
-                        <a href="/admintool" class="nav-item <%= currentPage === 'admin' ? 'active' : '' %>">
-                            AdminTools <span class="dev-tag">DEV</span>
-                        </a>
-                    <% } %>
-                    
-                    <a href="/inventory" class="nav-item <%= currentPage === 'inventory' ? 'active' : '' %>">Inventory</a>
-                </nav>
-            </div>
-
-            <div class="nav-right">
-                <div class="search-box">
-                    <span class="material-symbols-outlined icon">search</span>
-                    <input type="text" placeholder="Quick search...">
-                </div>
-                <div class="profile-section">
-                    <button class="btn-text"><span class="material-symbols-outlined">notifications</span></button>
-                    <button class="btn-text"><span class="material-symbols-outlined">settings</span></button>
-                    
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;">
-                        <span style="font-size: 14px; font-weight: 600; color: white;"><%= user.name %></span>
-                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;"><%= user.role %></span>
-                    </div>
-                    
-                    <div class="avatar">
-                        <span class="material-symbols-outlined">person</span>
-                    </div>
-                    
-                    <a href="/logout" class="btn-text" style="margin-left: 10px; color: var(--danger);" title="Logout">
-                        <span class="material-symbols-outlined">logout</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+    <%- include('includes/navbar') %>
 
     <main class="main-content">
         
