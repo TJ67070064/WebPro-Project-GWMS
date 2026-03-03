@@ -14,53 +14,7 @@
 
 <body class="dashboard-layout">
 
-    <header class="dash-header">
-        <div class="nav-container">
-            <div class="nav-left">
-                <div class="logo-small">
-                    <div class="logo-icon"><span class="material-symbols-outlined">music_note</span></div>
-                    <span>GWMS</span>
-                </div>
-                <nav class="nav-menu">
-                    <a href="/home" class="nav-item active">Overview</a>
-                    <a href="#" class="nav-item">Order</a>
-                    <a href="#" class="nav-item">History</a>
-                    <a href="#" class="nav-item">Inventory</a>
-
-                    <% if (user.role==='admin' ) { %>
-                        <a href="/admintool" class="nav-item" style="color: var(--primary);">
-                            AdminTools <span
-                                style="font-size: 10px; background: rgba(255,0,0,0.2); color: red; padding: 2px 4px; border-radius: 4px;">Dev
-                                Only</span>
-                        </a>
-                        <% } %>
-                </nav>
-            </div>
-
-            <div class="nav-right">
-                <div class="search-box">
-                    <span class="material-symbols-outlined icon">search</span>
-                    <input type="text" placeholder="Search SKU, Brand...">
-                </div>
-                <div class="profile-section">
-                    <div class="avatar">
-                        <%= user.name.charAt(0) %>
-                    </div>
-                    <div>
-                        <div style="font-weight: 700; font-size: 14px;">
-                            <%= user.name %>
-                        </div>
-                        <div style="color: var(--primary); font-size: 12px;">
-                            <%= user.role %>
-                        </div>
-                    </div>
-                    <a href="/" style="color: var(--text-muted); text-decoration: none; margin-left: 10px;">
-                        <span class="material-symbols-outlined">logout</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+   <%- include('includes/navbar') %>
 
     <main class="main-content">
         <div class="page-header">
