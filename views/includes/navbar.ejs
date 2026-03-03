@@ -1,0 +1,38 @@
+<header class="dash-header">
+    <div class="nav-container">
+        <div class="nav-left" style="display: flex; align-items: center; gap: 30px;">
+            <div class="logo-small" style="font-weight: 900; letter-spacing: 2px; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                <span class="material-symbols-outlined">music_note</span>
+                GWMS
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="/home" class="nav-item <%= currentPage === 'home' ? 'active' : '' %>">Overview</a>
+                <a href="/orders" class="nav-item <%= currentPage === 'orders' ? 'active' : '' %>">Order</a>
+                <a href="/history" class="nav-item <%= currentPage === 'history' ? 'active' : '' %>">History</a>
+                <a href="/inventory" class="nav-item <%= currentPage === 'inventory' ? 'active' : '' %>">Inventory</a>
+                
+                <% if (user && user.role === 'admin') { %>
+                    <a href="/admintool" class="nav-item <%= currentPage === 'admin' ? 'active' : '' %>">
+                        AdminTools<span class="dev-tag">DEV</span>
+                    </a>
+                <% } %>
+            </nav>
+        </div>
+
+        <div class="nav-right" style="display: flex; align-items: center; gap: 20px;">
+            <div class="profile-section" style="display: flex; align-items: center; gap: 12px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
+                <div class="avatar" style="width: 35px; height: 35px; background: var(--primary); color: #1a1a1b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;">
+                    <%= user.name.charAt(0).toUpperCase() %>
+                </div>
+                <div class="user-info">
+                    <div style="font-size: 13px; font-weight: 700;"><%= user.name %></div>
+                    <div style="font-size: 11px; color: var(--primary); opacity: 0.8; text-transform: uppercase;"><%= user.role %></div>
+                </div>
+                <a href="/logout" title="Logout" style="color: var(--text-muted); margin-left: 10px; display: flex;">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">logout</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
