@@ -30,6 +30,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
         console.log('Connected to the gwms.db SQLite database.');
         
         db.serialize(() => {
+            db.run("PRAGMA foreign_keys = ON"); //Enable foreign keys
             // --- สร้างตาราง users ---
             db.run(`CREATE TABLE IF NOT EXISTS Users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,13 +73,21 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 order_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 item_id INTEGER,
                 user_id INTEGER,
+                order_quantity INTEGER,
                 status TEXT,
                 detail TEXT,
-                timestamp DATE,
+                timestamp TEXT DEFAULT (DATETIME('now', 'localtime')),
 
                 FOREIGN KEY (item_id) REFERENCES Products(id),
                 FOREIGN KEY (user_id) REFERENCES Users(id)
                 )`)
+
+            const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
+                                VALUES (?, ?, ?, ?, ?)`;
+
+            db.run(insertOrder, [1, 1, 'Pending', 'Walk-in order', 12]);
+            db.run(insertOrder, [2, 2, 'Picking', 'Online order #1001', 14]);
+            db.run(insertOrder, [3, 1, 'Completed', 'Acoustic sale', 15]);
         });
     }
 });
@@ -92,7 +101,7 @@ app.get('/', (req, res) => {
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    
+
     const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
     db.get(sql, [username, password], (err, row) => {
         if (err) {
@@ -195,7 +204,7 @@ app.post('/admintool/delete/:id', requireAdmin, (req, res) => {
 app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
     const { name, role } = req.body;
     const sql = `UPDATE users SET name = ?, role = ? WHERE id = ?`;
-    
+
     db.run(sql, [name, role, req.params.id], function(err) {
         if (err) console.error(err.message);
         res.redirect('/admintool');
@@ -204,11 +213,29 @@ app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
 
 // 6. เข้าสู่หน้า Order Management
 app.get('/orders', (req, res) => {
-    res.render('order.ejs', {
-            user: req.session.user,
-            currentPage: 'orders'
+const selectOrders = `SELECT
+                    Orders.order_id,
+                    Orders.timestamp,
+                    Orders.order_quantity,
+                    Orders.status,
+                    Products.name AS product_name,
+                    Users.name AS user_name
+                    FROM Orders
+                    JOIN Products ON Orders.item_id = Products.id
+                    JOIN Users ON Orders.user_id = Users.id
+                    ORDER BY Orders.timestamp DESC
+                    `;
+    db.all(selectOrders, [], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
         }
-    );
+        res.render('order.ejs', {
+            user: req.session.user,
+            currentPage: 'orders',
+            orders: rows
+        })
+    })
 });
 
 // ==========================================
