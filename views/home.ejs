@@ -19,17 +19,10 @@
     <main class="main-content">
         <div class="page-header">
             <div>
-                <h2>Dashboard Overview</h2>
-                <p>Welcome back, <%= user.name.split(' ')[0] %>. Here' s what's happening in the warehouse today.</p>
+                <h2>สรุปภาพรวมแดชบอร์ด</h2>
+                <p>ยินดีต้อนรับ, <%= user.name.split(' ')[0] %>. วันนี้ที่โกดังมีอะไรเกิดขึ้นบ้าง มาดูกัน</p>
             </div>
-            <div class="btn-group">
-                <button class="btn-outline">
-                    <span class="material-symbols-outlined">download</span> Export Report
-                </button>
-                <button class="btn-primary">
-                    <span class="material-symbols-outlined">add</span> New Inbound
-                </button>
-            </div>
+            
         </div>
 
         <div class="stats-grid">
@@ -38,10 +31,8 @@
                     <div class="stat-icon" style="background: var(--success-bg); color: var(--success);">
                         <span class="material-symbols-outlined">inventory_2</span>
                     </div>
-                    <span class="badge success"><span class="material-symbols-outlined"
-                            style="font-size: 14px;">trending_up</span> +2.4%</span>
                 </div>
-                <div class="stat-title">Total Stock</div>
+                <div class="stat-title">สินค้าทั้งหมด</div>
                 <div class="stat-value">1,250</div>
             </div>
 
@@ -50,9 +41,9 @@
                     <div class="stat-icon" style="background: var(--danger-bg); color: var(--danger);">
                         <span class="material-symbols-outlined">warning</span>
                     </div>
-                    <span class="badge danger">Action Needed</span>
+                    <span class="badge danger">ตรวจสอบ</span>
                 </div>
-                <div class="stat-title">Low Stock Alerts</div>
+                <div class="stat-title">แจ้งเตือนสินค้าเหลือน้อย</div>
                 <div class="stat-value">5</div>
             </div>
 
@@ -62,7 +53,7 @@
                         <span class="material-symbols-outlined">pending_actions</span>
                     </div>
                 </div>
-                <div class="stat-title">Pending Approvals</div>
+                <div class="stat-title">รอการอนุมัติ</div>
                 <div class="stat-value">3</div>
             </div>
 
@@ -71,16 +62,16 @@
                     <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning);">
                         <span class="material-symbols-outlined">history</span>
                     </div>
-                    <span class="badge warning">> 90 Days</span>
+                    <span class="badge warning">> 90 วัน</span>
                 </div>
-                <div class="stat-title">Aging Stock</div>
+                <div class="stat-title">สินค้าค้างสต็อค</div>
                 <div class="stat-value">12</div>
             </div>
         </div>
 
         <div class="table-container">
             <div class="table-header">
-                <h3>Recent Activity</h3>
+                <h3>รายการที่ใช้งานล่าสุด:</h3>
                 <a href="#"
                     style="color: var(--primary); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px;">
                     View Full History <span class="material-symbols-outlined"
@@ -90,11 +81,11 @@
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th>Status</th>
-                        <th>Action</th>
-                        <th>Staff</th>
-                        <th>Timestamp</th>
-                        <th style="text-align: right;">Details</th>
+                        <th>สถานะ</th>
+                        <th>เรื่อง</th>
+                        <th>พนักงาน</th>
+                        <th>เวลา</th>
+                        <th style="text-align: right;">รายละเอียด</th>
                     </tr>
                 </thead>
                 <tbody>
