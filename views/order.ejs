@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/order.css">
+</head>
+<body>
+    <%- include('includes/navbar.ejs') %>
+
+    <main class="main-content">
+        <section class="page-header">
+            <div>
+                <h1>Order Management</h1>
+                <p>Track active shipments and processinventory requests.</p>
+            </div>
+            <div class="search-filter">
+                <div class="input-wrapper">
+                    <span class="material-symbols-outlined icon">search</span>
+                    <input type="text" class="form-control" placeholder="Search orders...">
+                </div>
+                <div>
+                    <button class="btn-outline">
+                        <span class="material-symbols-outlined">filter_list</span> Filter
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Pending orders</div>
+                <div class="stat-info">
+                    <h2>12</h2>
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: var(--info);">pending_actions</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Picking in Progress</div>
+                <div class="stat-info">
+                    <h2>5</h2>
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: var(--warning);">shopping_cart</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Ready for Dispatch</div>
+                <div class="stat-info">
+                    <h2>8</h2>
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: var(--success);">local_shipping</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="table-container">
+            <table class="custom-table">
+                <thead>
+                <tr>
+                    <th>หมายเลขใบเบิก</th>
+                    <th>เวลา</th>
+                    <th>รายการที่เบิก</th>
+                    <th>ผู้เบิก</th>
+                    <th>สถานะ</th>
+                    <th>จำนวน</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td> <%= order.order_id %> </td>
+                            <td> <%= order.timestamp %> </td>
+                            <td> <%= order.product_name %> </td>
+                            <td> <%= order.user_name %> </td>
+                            <td> <%= order.status %> </td>
+                            <td> <%= order.order_quantity %> </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

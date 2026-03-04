@@ -1,0 +1,13 @@
+.search-filter {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.stat-info {
+    display: flex;
+    justify-content:
+    space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}

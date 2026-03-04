@@ -93,7 +93,54 @@
                     </tbody>
                 </table>
             </div>
-        </main>
+
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (typeof dbUsers !== 'undefined' && dbUsers.length > 0) { %>
+                        <% dbUsers.forEach(function(u) { %>
+                        <tr>
+                            <td>
+                                <div class="staff-cell">
+                                    <div class="staff-avatar"><%= u.name.charAt(0) %></div>
+                                    <div style="font-weight: 600;"><%= u.name %></div>
+                                </div>
+                            </td>
+                            <td><span style="color: var(--text-muted);">@<%= u.username %></span></td>
+                            <td><span class="role-badge"><%= u.role %></span></td>
+                            <td style="text-align: right;">
+                                <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                                    <button onclick="openEditModal('<%= u.id %>', '<%= u.name %>', '<%= u.role %>')" class="btn-text" title="Edit">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </button>
+
+                                    <form action="/admintool/delete/<%= u.id %>" method="POST" onsubmit="return confirm('Confirm Delete?');">
+                                        <button type="submit" class="btn-text text-danger" title="Delete">
+                                            <span class="material-symbols-outlined">delete</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                No users found in database.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
 
         <div id="addUserModal" class="modal-overlay">
             <div class="modal-box">
