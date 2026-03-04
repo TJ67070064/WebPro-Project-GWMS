@@ -20,12 +20,11 @@
             <div class="brand-underline"></div>
         </div>
 
-        <% if (locals.error) { %>
+        <% if (error) { %>
             <div class="error-msg"><%= error %></div>
         <% } %>
 
         <form action="/login" method="POST">
-            
             <div class="form-group">
                 <label for="username">Username</label>
                 <div class="input-wrapper">

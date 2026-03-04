@@ -33,7 +33,7 @@
                 </div>
                 <span class="badge info">Total: <%= (typeof dbUsers !== 'undefined') ? dbUsers.length : 0 %> Users</span>
             </div>
-            
+
             <table class="custom-table">
                 <thead>
                     <tr>
@@ -60,7 +60,7 @@
                                     <button onclick="openEditModal('<%= u.id %>', '<%= u.name %>', '<%= u.role %>')" class="btn-text" title="Edit">
                                         <span class="material-symbols-outlined">edit</span>
                                     </button>
-                                    
+
                                     <form action="/admintool/delete/<%= u.id %>" method="POST" onsubmit="return confirm('Confirm Delete?');">
                                         <button type="submit" class="btn-text text-danger" title="Delete">
                                             <span class="material-symbols-outlined">delete</span>
