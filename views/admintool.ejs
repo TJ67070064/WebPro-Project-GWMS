@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GWMS AdminTools</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -13,27 +15,85 @@
 
     <%- include('includes/navbar') %>
 
-    <main class="main-content">
-        <div class="page-header">
-            <div>
-                <h2>User Management</h2>
-                <p>Manage system access roles and monitor critical security events.</p>
-            </div>
-            <button onclick="openModal('addUserModal')" class="btn-primary">
-                <span class="material-symbols-outlined">person_add</span>
-                Add New User
-            </button>
-        </div>
-
-        <div class="table-container">
-            <div class="table-header">
-                <div style="display: flex; align-items: center; gap: 10px; font-weight: 700;">
-                    <span class="material-symbols-outlined" style="color: var(--primary);">group</span>
-                    System Users
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>User Management</h2>
+                    <p>Manage system access roles and monitor critical security events.</p>
                 </div>
-                <span class="badge info">Total: <%= (typeof dbUsers !== 'undefined') ? dbUsers.length : 0 %> Users</span>
+                <button onclick="openModal('addUserModal')" class="btn-primary">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Add New User
+                </button>
             </div>
-            
+
+            <div class="table-container">
+                <div class="table-header">
+                    <div style="display: flex; align-items: center; gap: 10px; font-weight: 700;">
+                        <span class="material-symbols-outlined" style="color: var(--primary);">group</span>
+                        System Users
+                    </div>
+                    <span class="badge info">Total: <%= (typeof dbUsers !=='undefined' ) ? dbUsers.length : 0 %>
+                            Users</span>
+                </div>
+
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof dbUsers !=='undefined' && dbUsers.length> 0) { %>
+                            <% dbUsers.forEach(function(u) { %>
+                                <tr>
+                                    <td>
+                                        <div class="staff-cell">
+                                            <div class="staff-avatar">
+                                                <%= u.name.charAt(0) %>
+                                            </div>
+                                            <div style="font-weight: 600;">
+                                                <%= u.name %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span style="color: var(--text-muted);">@<%= u.username %></span></td>
+                                    <td><span class="role-badge">
+                                            <%= u.role %>
+                                        </span></td>
+                                    <td style="text-align: right;">
+                                        <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                                            <button
+                                                onclick="openEditModal('<%= u.id %>', '<%= u.name %>', '<%= u.role %>')"
+                                                class="btn-text" title="Edit">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+
+                                            <form action="/admintool/delete/<%= u.id %>" method="POST"
+                                                onsubmit="return confirm('Confirm Delete?');">
+                                                <button type="submit" class="btn-text text-danger" title="Delete">
+                                                    <span class="material-symbols-outlined">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="4"
+                                                style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                                No users found in database.
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
             <table class="custom-table">
                 <thead>
                     <tr>
@@ -60,7 +120,7 @@
                                     <button onclick="openEditModal('<%= u.id %>', '<%= u.name %>', '<%= u.role %>')" class="btn-text" title="Edit">
                                         <span class="material-symbols-outlined">edit</span>
                                     </button>
-                                    
+
                                     <form action="/admintool/delete/<%= u.id %>" method="POST" onsubmit="return confirm('Confirm Delete?');">
                                         <button type="submit" class="btn-text text-danger" title="Delete">
                                             <span class="material-symbols-outlined">delete</span>
@@ -82,46 +142,84 @@
         </div>
     </main>
 
-    <div id="addUserModal" class="modal-overlay">
-        <div class="modal-box">
-            <h2>Add New User</h2>
-            <form action="/admintool/add" method="POST">
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label>Display Name</label>
-                    <input type="text" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <select name="role" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
-                        <option value="admin">Admin</option>
-                        <option value="staff">Staff</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" onclick="closeModal('addUserModal')" class="btn-text">Cancel</button>
-                    <button type="submit" class="btn-primary">Save User</button>
-                </div>
-            </form>
+        <div id="addUserModal" class="modal-overlay">
+            <div class="modal-box">
+                <h2>Add New User</h2>
+                <form action="/admintool/add" method="POST">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select name="role"
+                            style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                            <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
+                            <option value="manager">Manager</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeModal('addUserModal')" class="btn-text">Cancel</button>
+                        <button type="submit" class="btn-primary">Save User</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <script>
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function openEditModal(id, name, role) {
-            document.getElementById('editForm').action = '/admintool/edit/' + id;
-            document.getElementById('editName').value = name;
-            document.getElementById('editRole').value = role;
-            openModal('editUserModal');
-        }
-    </script>
+        <div id="editUserModal" class="modal-overlay">
+            <div class="modal-box">
+                <h2 style="margin-bottom: 20px; font-size: 20px;">Edit User</h2>
+                <form id="editForm" method="POST">
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="editName" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="editRole" name="role" class="form-control">
+                            <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
+                            <option value="manager">Manager</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeModal('editUserModal')" class="btn-text">Cancel</button>
+                        <button type="submit" class="btn-primary">Update User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+
+            function openModal(id) {
+                document.getElementById(id).classList.add('active');
+            }
+            function closeModal(id) {
+                document.getElementById(id).classList.remove('active');
+            }
+            function openEditModal(id, name, role) {
+                document.getElementById('editForm').action = '/admintool/edit/' + id;
+                document.getElementById('editName').value = name;
+                document.getElementById('editRole').value = role;
+                openModal('editUserModal');
+            }
+
+            window.onclick = function (event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    event.target.classList.remove('active');
+                }
+            }
+        </script>
 </body>
+
 </html>

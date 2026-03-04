@@ -1,10 +1,13 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose(); // 1. เรียกใช้ sqlite3
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 
+// ==========================================
+// 1. ตั้งค่าพื้นฐาน (Middleware & View Engine)
+// ==========================================
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -17,16 +20,19 @@ app.use(session({
     saveUninitialized: false
 }));
 
-// 2. เชื่อมต่อฐานข้อมูล (จะสร้างไฟล์ user.db ให้อัตโนมัติในโฟลเดอร์โปรเจกต์)
-const db = new sqlite3.Database('./user.db', (err) => {
+// ==========================================
+// 2. เชื่อมต่อและตั้งค่าฐานข้อมูล SQLite
+// ==========================================
+const db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
         console.error('Error opening database', err.message);
     } else {
-        console.log('Connected to the user.db SQLite database.');
+        console.log('Connected to the gwms.db SQLite database.');
         
-        // 3. สร้างตาราง users (ถ้ายังไม่มี) และใส่ข้อมูลตั้งต้น
         db.serialize(() => {
-            db.run(`CREATE TABLE IF NOT EXISTS users (
+            db.run("PRAGMA foreign_keys = ON"); //Enable foreign keys
+            // --- สร้างตาราง users ---
+            db.run(`CREATE TABLE IF NOT EXISTS Users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE,
                 password TEXT,
@@ -34,26 +40,69 @@ const db = new sqlite3.Database('./user.db', (err) => {
                 role TEXT
             )`);
 
-            // ใส่ข้อมูลจำลองลงไปใน Database (ใช้ INSERT OR IGNORE เพื่อป้องกันการใส่ข้อมูลซ้ำเวลาเปิดเซิร์ฟเวอร์ใหม่)
-            const insertData = `INSERT OR IGNORE INTO users (username, password, name, role) VALUES 
+            // ใส่ข้อมูล User จำลอง
+            const insertUsers = `INSERT OR IGNORE INTO Users (username, password, name, role) VALUES 
                 ('admin', '1234', 'TJ', 'admin'),
                 ('staff1', '1234', 'Somchai', 'staff')`;
-            db.run(insertData);
+            db.run(insertUsers);
+
+            // --- สร้างตาราง products สำหรับหน้า Inventory ---
+            db.run(`CREATE TABLE IF NOT EXISTS Products (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                details TEXT,
+                brand TEXT,
+                category TEXT,
+                sku TEXT UNIQUE,
+                zone TEXT,
+                quantity INTEGER,
+                icon TEXT
+            )`);
+
+            // ใส่ข้อมูลสินค้าจำลองตั้งต้น
+            const insertProducts = `INSERT OR IGNORE INTO Products (name, details, brand, category, sku, zone, quantity, icon) VALUES 
+                ('Stratocaster Pro II', 'Dark Night', 'Fender', 'Electric', 'FND-STR-001', 'Zone A / Rack 12', 12, 'electric_car'),
+                ('Les Paul Standard', 'Heritage Cherry Sunburst', 'Gibson', 'Electric', 'GIB-LP-050', 'Zone A / Rack 08', 2, 'electric_car'),
+                ('D-28 Acoustic', 'Natural', 'Martin', 'Acoustic', 'MAR-D28-002', 'Zone B / Shelf 02', 5, 'music_note'),
+                ('RG550 Genesis', 'Desert Sun Yellow', 'Ibanez', 'Electric', 'IBZ-RG-112', 'Zone A / Rack 22', 0, 'electric_bolt'),
+                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'cable')`;
+            db.run(insertProducts);
+
+            //สร้างตาราง Order
+            db.run(`CREATE TABLE IF NOT EXISTS Orders (
+                order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_id INTEGER,
+                user_id INTEGER,
+                order_quantity INTEGER,
+                status TEXT,
+                detail TEXT,
+                timestamp TEXT DEFAULT (DATETIME('now', 'localtime')),
+
+                FOREIGN KEY (item_id) REFERENCES Products(id),
+                FOREIGN KEY (user_id) REFERENCES Users(id)
+                )`)
+
+            const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
+                                VALUES (?, ?, ?, ?, ?)`;
+
+            db.run(insertOrder, [1, 1, 'Pending', 'Walk-in order', 12]);
+            db.run(insertOrder, [2, 2, 'Picking', 'Online order #1001', 14]);
+            db.run(insertOrder, [3, 1, 'Completed', 'Acoustic sale', 15]);
         });
     }
 });
 
+// ==========================================
+// 3. ระบบ Authentication (Login / Logout)
+// ==========================================
 app.get('/', (req, res) => {
-    res.render('login'); 
+    res.render('login' , { error: null });
 });
 
-// 4. แก้ไข Route Login ให้ดึงข้อมูลจาก Database แทน Array
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    
-    // ค้นหาข้อมูลผู้ใช้จากฐานข้อมูล SQLite
+
     const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
-    
     db.get(sql, [username, password], (err, row) => {
         if (err) {
             console.error(err.message);
@@ -61,27 +110,31 @@ app.post('/login', (req, res) => {
         }
         
         if (row) {
-            // ถ้ารหัสถูกและเจอข้อมูล (row) ให้บันทึกลง Session
             req.session.user = {
                 name: row.name,
                 role: row.role
             };
-            res.redirect('/home'); 
+            res.redirect('/home');
         } else {
-            // ถ้าไม่เจอข้อมูล (รหัสผิด)
             res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง' });
         }
     });
 });
 
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
+// ==========================================
+// 4. หน้าหลัก (Home & Inventory)
+// ==========================================
 app.get('/home', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/');
-    }
-    // เพิ่ม currentPage: 'home' เพื่อให้ Navbar รู้ว่าต้องไฮไลท์เมนูไหน
-    res.render('home', { 
+    if (!req.session.user) return res.redirect('/');
+    
+    res.render('home', {
         user: req.session.user,
-        currentPage: 'home' 
+        currentPage: 'home'
     });
 });
 
@@ -97,14 +150,35 @@ app.get('/history', (req, res) => {
 });
 
 
+app.get('/inventory', (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    
+    // ดึงข้อมูลสินค้าทั้งหมดจากฐานข้อมูล
+    db.all(`SELECT * FROM products`, [], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
+        }
+        
+        // ส่งต่อให้ไฟล์ inventory.ejs ไปวนลูปแสดงผล
+        res.render('inventory', {
+            user: req.session.user,
+            currentPage: 'inventory',
+            products: rows
+        });
+    });
+});
+
+// ==========================================
+// 5. ระบบจัดการแอดมิน (Admin Tools)
+// ==========================================
 const requireAdmin = (req, res, next) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
-        return res.redirect('/home'); // ถ้าไม่ใช่ admin ให้เด้งกลับไปหน้า home
+        return res.redirect('/home'); 
     }
     next();
 };
 
-//หน้า Admin Tool
 app.get('/admintool', requireAdmin, (req, res) => {
     const sql = `SELECT id, username, name, role FROM users`;
     
@@ -113,7 +187,6 @@ app.get('/admintool', requireAdmin, (req, res) => {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
-        // เพิ่ม currentPage: 'admin' ตรงนี้ด้วยครับ
         res.render('admintool', { 
             dbUsers: rows, 
             user: req.session.user,
@@ -122,21 +195,16 @@ app.get('/admintool', requireAdmin, (req, res) => {
     });
 });
 
-//Route เพิ่ม User
 app.post('/admintool/add', requireAdmin, (req, res) => {
     const { username, password, name, role } = req.body;
     
     const sql = `INSERT INTO users (username, password, name, role) VALUES (?, ?, ?, ?)`;
     db.run(sql, [username, password, name, role], function(err) {
-        if (err) {
-            console.error(err.message);
-            // ในของจริงอาจจะส่งแจ้งเตือนกลับไปว่า Username ซ้ำ
-        }
+        if (err) console.error(err.message);
         res.redirect('/admintool');
     });
 });
 
-//Route ลบ User 
 app.post('/admintool/delete/:id', requireAdmin, (req, res) => {
     const sql = `DELETE FROM users WHERE id = ?`;
     db.run(sql, req.params.id, function(err) {
@@ -145,23 +213,46 @@ app.post('/admintool/delete/:id', requireAdmin, (req, res) => {
     });
 });
 
-//Route Update User 
 app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
     const { name, role } = req.body;
     const sql = `UPDATE users SET name = ?, role = ? WHERE id = ?`;
-    
+
     db.run(sql, [name, role, req.params.id], function(err) {
         if (err) console.error(err.message);
         res.redirect('/admintool');
     });
 });
 
-
-app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+// 6. เข้าสู่หน้า Order Management
+app.get('/orders', (req, res) => {
+const selectOrders = `SELECT
+                    Orders.order_id,
+                    Orders.timestamp,
+                    Orders.order_quantity,
+                    Orders.status,
+                    Products.name AS product_name,
+                    Users.name AS user_name
+                    FROM Orders
+                    JOIN Products ON Orders.item_id = Products.id
+                    JOIN Users ON Orders.user_id = Users.id
+                    ORDER BY Orders.timestamp DESC
+                    `;
+    db.all(selectOrders, [], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
+        }
+        res.render('order.ejs', {
+            user: req.session.user,
+            currentPage: 'orders',
+            orders: rows
+        })
+    })
 });
 
+// ==========================================
+// 7. เริ่มการทำงานเซิร์ฟเวอร์
+// ==========================================
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`GWMS Server started at http://localhost:${PORT}`);
