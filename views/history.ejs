@@ -10,5 +10,108 @@
 </head>
 <body>
     <%- include('includes/navbar') %>
+    <div class="history-wrapper">
+
+        <!-- Header -->
+        <div class="history-header">
+            <div>
+                <h1>Activity Log</h1>
+                <p>Track inventory movements, system modifications, and staff actions.</p>
+            </div>
+            <button class="export-btn">Export CSV</button>
+        </div>
+
+
+        <!-- Filter -->
+        <div class="filter-box">
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Date Range</label>
+                    <input type="text" placeholder="Select dates">
+                </div>
+
+                <div class="filter-group">
+                    <label>Action Type</label>
+                    <select>
+                        <option>All Actions</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Staff Member</label>
+                    <input type="text" placeholder="Search staff...">
+                </div>
+
+                <div style="display:flex;align-items:flex-end;">
+                    <button class="filter-btn">Filter</button>
+                </div>
+            </div>
+
+            <div class="quick-filters">
+                <span style="color:#a1a1a1;font-size:12px;">QUICK FILTERS:</span>
+                <div class="quick-pill pill-inbound">Inbound</div>
+                <div class="quick-pill pill-outbound">Outbound</div>
+                <div class="quick-pill pill-edits">Edits</div>
+                <div class="quick-pill pill-audits">Audits</div>
+            </div>
+
+        </div>
+
+
+        <!-- Table -->
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>TIMESTAMP</th>
+                    <th>ACTOR</th>
+                    <th>ACTION TYPE</th>
+                    <th>ITEM REFERENCE</th>
+                    <th>DETAILS</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td>Oct 24, 2023<br>14:32 PM</td>
+                    <td>John Doe</td>
+                    <td>Receive Stock</td>
+                    <td>Fender Stratocaster<br>SN: US2105489</td>
+                    <td>Added to inventory from Shipment #8922. Placed in Zone A-12.</td>
+                    <td class="status-green">Completed</td>
+                </tr>
+
+                <tr>
+                    <td>Oct 23, 2023<br>09:45 AM</td>
+                    <td>Mike King</td>
+                    <td>Dispatch</td>
+                    <td>Ibanez RG550<br>SN: F210332</td>
+                    <td>Order #4451 shipped to Customer via FedEx.</td>
+                    <td class="status-green">Shipped</td>
+                </tr>
+
+                <tr>
+                    <td>Oct 23, 2023<br>08:20 AM</td>
+                    <td>John Doe</td>
+                    <td>QC Rejection</td>
+                    <td>PRS Custom 24<br>SN: 210987</td>
+                    <td>Failed inbound inspection. Neck warp detected.</td>
+                    <td class="status-red">Action Required</td>
+                </tr>
+
+            </tbody>
+        </table>
+
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="page-btn">Previous</div>
+            <div class="page-btn active">1</div>
+            <div class="page-btn">2</div>
+            <div class="page-btn">Next</div>
+        </div>
+
+    </div>
 </body>
 </html>
