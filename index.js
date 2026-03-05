@@ -140,6 +140,17 @@ app.get('/home', (req, res) => {
     });
 });
 
+app.get('/history', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/');
+    }
+    // เพิ่ม currentPage: 'home' เพื่อให้ Navbar รู้ว่าต้องไฮไลท์เมนูไหน
+    res.render('history', { 
+        user: req.session.user,
+        currentPage: 'history' 
+    });
+});
+
 app.get('/inventory', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
