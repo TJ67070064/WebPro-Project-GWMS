@@ -9,168 +9,270 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/navbar.css">
 </head>
 
 <body class="dashboard-layout">
 
     <%- include('includes/navbar') %>
 
-    <main class="main-content">
-        
-        <div class="page-header">
-            <div>
-                <h2>รายการสินค้า</h2>
-                
-            </div>
-            <div class="btn-group">
-                <button class="btn-primary">
-                    <span class="material-symbols-outlined">add_circle</span> Add Product
-                </button>
-            </div>
-        </div>
+        <main class="main-content">
 
-        <div class="filter-bar">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>คำค้นหา</label>
-                <div class="input-wrapper">
-                    <span class="material-symbols-outlined icon">search</span>
-                    <input type="text" class="form-control" placeholder="Search by name, SKU, or serial...">
+            <div class="page-header">
+                <div>
+                    <p
+                        style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--primary); font-weight: 700; margin-bottom: 5px;">
+                        ระบบโลจิสติกส์คลังสินค้า</p>
+                    <h2>รายการสินค้าคงคลัง</h2>
+                    <p>จัดการสินทรัพย์ในคลังสินค้าแบบรวมศูนย์ ตรวจสอบระดับสต็อกแบบเรียลไทม์ และติดตามหมายเลขซีเรียล
+                        (SKU)</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-outline">
+                        <span class="material-symbols-outlined">file_download</span> ส่งออกข้อมูล
+                    </button>
+                    <button class="btn-primary" onclick="document.getElementById('addModal').style.display='flex'">
+                        <span class="material-symbols-outlined">add_circle</span> เพิ่มสินค้า
+                    </button>
                 </div>
             </div>
-            
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>โรงงานผลิต</label>
-                <select class="form-control">
-                    <option value="">All Brands</option>
-                    <option value="Fender">Fender</option>
-                    <option value="Gibson">Gibson</option>
-                    <option value="Ibanez">Ibanez</option>
-                    <option value="Martin">Martin</option>
-                    <option value="Ernie Ball">Ernie Ball</option>
-                </select>
+
+            <div class="filter-bar">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>ค้นหาสินค้า</label>
+                    <div class="input-wrapper">
+                        <span class="material-symbols-outlined icon">search</span>
+                        <input type="text" class="form-control" placeholder="ค้นหาด้วยชื่อ, SKU หรือซีเรียล...">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>ผู้ผลิต / แบรนด์</label>
+                    <select class="form-control">
+                        <option value="">ทุกแบรนด์</option>
+                        <option value="Fender">Fender</option>
+                        <option value="Gibson">Gibson</option>
+                        <option value="Ibanez">Ibanez</option>
+                        <option value="Martin">Martin</option>
+                        <option value="Ernie Ball">Ernie Ball</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>สถานะสต็อก</label>
+                    <select class="form-control">
+                        <option value="">ทุกสถานะ</option>
+                        <option value="instock">มีสินค้า</option>
+                        <option value="lowstock">สินค้าใกล้หมด</option>
+                        <option value="outstock">สินค้าหมด</option>
+                    </select>
+                </div>
+
             </div>
 
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>สถานะ</label>
-                <select class="form-control">
-                    <option value="">All Statuses</option>
-                    <option value="instock">In Stock</option>
-                    <option value="lowstock">Low Stock</option>
-                    <option value="outstock">Out of Stock</option>
-                </select>
-            </div>
-
-        </div>
-
-        <div class="table-container">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>รายละเอียดสินค้า</th>
-                        <th>แบรนด์</th>
-                        <th>ID สินค้า</th>
-                        <th>โซนจัดเก็บ</th>
-                        <th style="text-align: center;">จำนวน</th>
-                        <th>สถานะ</th>
-                        <th style="text-align: right;">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (products && products.length > 0) { %>
-                        
-                        <% products.forEach(product => { %>
-                            
-                            <% 
-                                let qtyColor = 'white';
-                                let badgeClass = 'success';
-                                let statusText = 'In Stock';
-                                
-                                if (product.quantity == 0) {
-                                    qtyColor = 'var(--danger)';
-                                    badgeClass = 'danger';
-                                    statusText = 'Out of Stock';
-                                } else if (product.quantity <= 5) {
-                                    qtyColor = 'var(--warning)';
-                                    badgeClass = 'warning';
-                                    statusText = 'Low Stock';
-                                }
-                                
-                                // สุ่มสีจุดบ่งบอก Zone ตามประเภทสินค้า
-                                let dotColor = 'cyan';
-                                if (product.category === 'Acoustic') dotColor = 'orange';
-                                else if (product.category === 'Accessory') dotColor = 'purple';
-                            %>
-                            
-                            <tr>
-                                <td>
-                                    <div class="product-cell">
-                                        <div class="icon-box"><span class="material-symbols-outlined"><%= product.icon %></span></div>
-                                        <div class="product-info">
-                                            <h4><%= product.name %></h4>
-                                            <p><%= product.details %></p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="product-info">
-                                        <h4><%= product.brand %></h4>
-                                        <span class="badge info"><%= product.category %></span>
-                                    </div>
-                                </td>
-                                <td><span class="tag-mono">SKU: <%= product.sku %></span></td>
-                                <td>
-                                    <div class="zone-indicator">
-                                        <div class="zone-dot <%= dotColor %>"></div>
-                                        <%= product.zone %>
-                                    </div>
-                                </td>
-                                <td style="text-align: center; font-weight: bold; font-size: 16px; color: <%= qtyColor %>;">
-                                    <%= product.quantity %>
-                                </td>
-                                <td><span class="badge <%= badgeClass %>"><%= statusText %></span></td>
-                                <td style="text-align: right;">
-                                    <button class="btn-icon edit" title="Edit Item"><span class="material-symbols-outlined">edit_square</span></button>
-                                    <button class="btn-icon" title="History"><span class="material-symbols-outlined">history</span></button>
-                                </td>
-                            </tr>
-                        <% }) %>
-                        
-                    <% } else { %>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
                         <tr>
-                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">
-                                <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 10px;">inventory_2</span>
-                                <p>ไม่พบสินค้า สินค้าหมด.</p>
-                            </td>
+                            <th>รายละเอียดสินค้า</th>
+                            <th>แบรนด์</th>
+                            <th>รหัสสินค้า (SKU)</th>
+                            <th>โซนจัดเก็บ</th>
+                            <th style="text-align: center;">จำนวน</th>
+                            <th>สถานะ</th>
+                            <th style="text-align: right;">จัดการ</th>
                         </tr>
-                    <% } %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% if (products && products.length> 0) { %>
 
-            <div class="pagination-wrapper">
-                <div class="pagination-info">แสดง <strong>1</strong> – <strong><%= products ? products.length : 0 %></strong> : <strong><%= products ? products.length : 0 %></strong> ผลลัพท์</div>
-                <div class="pagination">
-                    <a href="#" class="page-item"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_left</span></a>
-                    <a href="#" class="page-item active">1</a>
-                    <a href="#" class="page-item"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_right</span></a>
+                            <% products.forEach(product=> { %>
+
+                                <% 
+                                    let qtyColor = 'white';
+                                    let badgeClass = 'success';
+                                    let statusText = 'มีสินค้า';
+
+                                    if (product.quantity == 0) {
+                                        qtyColor = 'var(--danger)';
+                                        badgeClass = 'danger';
+                                        statusText = 'สินค้าหมด';
+                                    } else if (product.quantity <= 5) {
+                                        qtyColor = 'var(--warning)';
+                                        badgeClass = 'warning';
+                                        statusText = 'สินค้าใกล้หมด';
+                                    }
+
+                                    let dotColor = 'cyan';
+                                    if (product.category === 'Acoustic') dotColor = 'orange';
+                                    else if (product.category === 'Accessory') dotColor = 'purple';
+                                    %>
+
+                                    <tr>
+                                        <td>
+                                            <div class="product-cell">
+                                                <div class="icon-box"><span class="material-symbols-outlined">
+                                                        <%= product.icon || 'inventory_2' %>
+                                                    </span></div>
+                                                <div class="product-info">
+                                                    <h4>
+                                                        <%= product.name %>
+                                                    </h4>
+                                                    <p>
+                                                        <%= product.details %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="product-info">
+                                                <h4>
+                                                    <%= product.brand %>
+                                                </h4>
+                                                <span class="badge info">
+                                                    <%= product.category %>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td><span class="tag-mono">SKU: <%= product.sku %></span></td>
+                                        <td>
+                                            <div class="zone-indicator">
+                                                <div class="zone-dot <%= dotColor %>"></div>
+                                                <%= product.zone %>
+                                            </div>
+                                        </td>
+                                        <td
+                                            style="text-align: center; font-weight: bold; font-size: 16px; color: <%= qtyColor %>;">
+                                            <%= product.quantity %>
+                                        </td>
+                                        <td><span class="badge <%= badgeClass %>">
+                                                <%= statusText %>
+                                            </span></td>
+                                        <td style="text-align: right;">
+                                            <button class="btn-icon edit" title="แก้ไข"><span
+                                                    class="material-symbols-outlined">edit_square</span></button>
+                                            <button class="btn-icon" title="ประวัติการเคลื่อนไหว"><span
+                                                    class="material-symbols-outlined">history</span></button>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="7"
+                                                    style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size: 48px; opacity: 0.5; margin-bottom: 10px;">inventory_2</span>
+                                                    <p>ไม่พบสินค้าในคลัง</p>
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                    </tbody>
+                </table>
+
+                <div class="pagination-wrapper">
+                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong>
+                            <%= products ? products.length : 0 %>
+                        </strong> จากทั้งหมด <strong>
+                            <%= products ? products.length : 0 %>
+                        </strong> รายการ</div>
+                    <div class="pagination">
+                        <a href="#" class="page-item"><span class="material-symbols-outlined"
+                                style="font-size: 16px; transform: translateY(2px);">chevron_left</span></a>
+                        <a href="#" class="page-item active">1</a>
+                        <a href="#" class="page-item"><span class="material-symbols-outlined"
+                                style="font-size: 16px; transform: translateY(2px);">chevron_right</span></a>
+                    </div>
                 </div>
             </div>
+
+            <footer class="dash-footer">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <strong style="color: var(--primary);">GWMS</strong>
+                    <span>v2.4.1 (Stable)</span>
+                </div>
+                <div style="text-transform: uppercase; letter-spacing: 1px;">
+                    © 2026 Guitar Warehouse Systems. การเชื่อมต่อที่ปลอดภัย
+                </div>
+                <div class="links">
+                    <a href="#">นโยบายความเป็นส่วนตัว</a>
+                    <a href="#">ข้อกำหนด</a>
+                    <a href="#">ศูนย์ช่วยเหลือ</a>
+                </div>
+            </footer>
+
+        </main>
+
+        <div id="addModal" class="modal-overlay">
+            <div class="modal-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: #111;">เพิ่มสินค้าใหม่</h3>
+                    <button onclick="document.getElementById('addModal').style.display='none'"
+                        style="background: none; border: none; cursor: pointer; color: #888;">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <form action="/inventory/add" method="POST" style="display: flex; flex-direction: column;">
+
+                    <div class="form-grid">
+                        <div>
+                            <label class="modal-label">ชื่อสินค้า</label>
+                            <input type="text" name="name" required class="form-control modal-input"
+                                placeholder="เช่น Stratocaster">
+                        </div>
+                        <div>
+                            <label class="modal-label">รหัสสินค้า (SKU)</label>
+                            <input type="text" name="sku" required class="form-control modal-input"
+                                placeholder="เช่น FND-001">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div>
+                            <label class="modal-label">แบรนด์</label>
+                            <input type="text" name="brand" required class="form-control modal-input"
+                                placeholder="เช่น Fender">
+                        </div>
+                        <div>
+                            <label class="modal-label">หมวดหมู่</label>
+                            <select name="category" required class="form-control modal-input">
+                                <option value="Electric">กีตาร์ไฟฟ้า (Electric)</option>
+                                <option value="Acoustic">กีตาร์โปร่ง (Acoustic)</option>
+                                <option value="Accessory">อุปกรณ์เสริม (Accessory)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
+                        <div>
+                            <label class="modal-label">โซน/ตำแหน่งจัดเก็บ</label>
+                            <input type="text" name="zone" required class="form-control modal-input"
+                                placeholder="เช่น Zone A / Rack 01">
+                        </div>
+                        <div>
+                            <label class="modal-label">จำนวนสต็อก</label>
+                            <input type="number" name="quantity" required min="0" value="0"
+                                class="form-control modal-input">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label class="modal-label">รายละเอียดเพิ่มเติม / สี</label>
+                        <input type="text" name="details" class="form-control modal-input"
+                            placeholder="เช่น สี 3-Color Sunburst">
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn-primary"
+                            style="flex: 1; display: flex; justify-content: center;">บันทึกสินค้า</button>
+                        <button type="button" class="btn-outline"
+                            onclick="document.getElementById('addModal').style.display='none'"
+                            style="flex: 1; display: flex; justify-content: center;">ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <footer class="dash-footer">
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <strong style="color: var(--primary);">GWMS</strong> 
-            </div>
-            <div style="text-transform: uppercase; letter-spacing: 1px;">
-                © 2026 Guitar Warehouse Systems. Secure Connection.
-            </div>
-            <div class="links">
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
-                <a href="#">Help Center</a>
-            </div>
-        </footer>
-
-    </main>
 
 </body>
 </html> -->

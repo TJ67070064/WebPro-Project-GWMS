@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/navbar.css">
 </head>
 
 <body class="dashboard-layout">
@@ -155,6 +156,7 @@
             openModal('editUserModal');
         }
 
+        //ถ้าเปิด overlay แล้วไปกด click ด้านนอกจะออกให้อัตโนมัติ
         window.onclick = function (event) {
             if (event.target.classList.contains('modal-overlay')) {
                 event.target.classList.remove('active');

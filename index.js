@@ -112,6 +112,7 @@ app.post('/login', (req, res) => {
 
         if (row) {
             req.session.user = {
+                id: row.id,
                 name: row.name,
                 role: row.role
             };
@@ -260,6 +261,21 @@ app.get('/orders', (req, res) => {
             orders: rows
         })
     })
+});
+
+//API ==============================
+app.get('/api/product/:id', (req, res) => {
+    const productId = req.params.id;
+    const sql = `SELECT * FROM Products WHERE id = ?`;
+
+    db.get(sql, [productId], (err, row) => {
+        if (err || !row) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+        // Send the data back as a JSON object (res.json() จะส่งข้อมูลกลับไปเป็น json)
+        console.log("Send data from /api/product/:id back with ", row);
+        res.json(row);
+    });
 });
 
 // ==========================================
