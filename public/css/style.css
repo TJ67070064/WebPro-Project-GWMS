@@ -362,15 +362,20 @@ body.dashboard-page {
 .custom-table tr:hover td { background: rgba(255,255,255,0.02); }
 
 /* =========================================
-   7. Modals
+   7. Modals (Overlay)
    ========================================= */
+
+/* ตัว overlay จะครอบทั้งหน้าจอเลย มีการใส่ blur ให้พื้นหลัง blur หมด และก็เพิ่ม box-modal ไว้ตรงกลาง */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
     display: none; align-items: center; justify-content: center; z-index: 2000;
 }
+
+/* เปลี่ยน display หลังจาก overlay (ให้แสดงผล) */
 .modal-overlay.active { display: flex; }
 
+/* modal-box คือเนื้อหาตรงกลางของ overlay จริง ๆ */
 .modal-box {
     background: var(--panel-bg); padding: 30px; border-radius: 20px;
     width: 100%; max-width: 400px; border: 1px solid rgba(238, 173, 43, 0.3);

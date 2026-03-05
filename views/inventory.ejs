@@ -77,14 +77,12 @@
                 </thead>
                 <tbody>
                     <% if (products && products.length > 0) { %>
-                        
                         <% products.forEach(product => { %>
-                            
-                            <% 
+                            <%
                                 let qtyColor = 'white';
                                 let badgeClass = 'success';
                                 let statusText = 'In Stock';
-                                
+
                                 if (product.quantity == 0) {
                                     qtyColor = 'var(--danger)';
                                     badgeClass = 'danger';
@@ -100,7 +98,7 @@
                                 if (product.category === 'Acoustic') dotColor = 'orange';
                                 else if (product.category === 'Accessory') dotColor = 'purple';
                             %>
-                            
+
                             <tr>
                                 <td>
                                     <div class="product-cell">
@@ -131,10 +129,11 @@
                                 <td style="text-align: right;">
                                     <button class="btn-icon edit" title="Edit Item"><span class="material-symbols-outlined">edit_square</span></button>
                                     <button class="btn-icon" title="History"><span class="material-symbols-outlined">history</span></button>
+                                    <button class="btn-icon" title="เพิ่มออเดอร์" onclick="loadAndShowOrderModal('<%= product.id %>')"><span class="material-symbols-outlined">add_notes</span></button>
                                 </td>
                             </tr>
                         <% }) %>
-                        
+
                     <% } else { %>
                         <tr>
                             <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">
@@ -158,7 +157,7 @@
 
         <footer class="dash-footer">
             <div style="display: flex; gap: 10px; align-items: center;">
-                <strong style="color: var(--primary);">GWMS</strong> 
+                <strong style="color: var(--primary);">GWMS</strong>
             </div>
             <div style="text-transform: uppercase; letter-spacing: 1px;">
                 © 2026 Guitar Warehouse Systems. Secure Connection.
@@ -172,5 +171,80 @@
 
     </main>
 
+        <!-- ส่วน Overlay ในการเพิ่มใบออเดอร์-->
+    <section id="addOrderModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">Product Name</h2>
+            <p id="modalDetails" style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Details</p>
+            <!-- action เป็น empty ก่อน ไปเพิ่มใน function ด้านล่าง -->
+            <form id="orderForm" method="POST" action="">
+                <input type="hidden" name="productId" id="modalProductId">
+
+                <div class="form-group">
+                    <label>จำนวนที่ต้องการสั่ง มีทั้งหมด <span id="currentQuantity" style="color: var(--warning);"></span> ชิ้น</label>
+                    <input id="quantityInput" type="number" name="quantity" class="form-control" required min="1" placeholder="ใส่จำนวน..." value="1">
+                </div>
+
+                <div class="form-group">
+                    <label>ระบุรายละเอียดออเดอร์</label>
+                    <input id="detailInput" type="text" name="detail" class="form-control" required placeholder="รายละเอียด...">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" onclick="closeModal('addOrderModal')" class="btn-text">ยกเลิก</button>
+                    <button type="submit" class="btn-primary" style="width: auto;">ยืนยันออเดอร์</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        // function openEditModal(id, name, role) {
+        //     document.getElementById('editForm').action = '/admintool/edit/' + id;
+        //     document.getElementById('editName').value = name;
+        //     document.getElementById('editRole').value = role;
+        //     openModal('editUserModal');
+        // }
+
+        //Demo
+        async function loadAndShowOrderModal(productId) {
+            try {
+                // 1. Ask the server for the data
+                const response = await fetch('/api/product/' + productId);
+
+                if (!response.ok) throw new Error('Product not found');
+
+                // 2. Convert to object
+                const product = await response.json();
+
+                // 3. Inject the data into the HTML elements we gave IDs to
+                document.getElementById('modalProductName').innerText = "เบิกสินค้า: " + product.name;
+                document.getElementById('modalDetails').innerText = product.details + " (" + product.sku + ")";
+                document.getElementById('modalProductId').value = product.id;
+                document.getElementById('currentQuantity').innerHTML = product.quantity;
+                document.getElementById('quantityInput').max = product.quantity;
+                document.getElementById('orderForm').action = `/inventory/add-order/${productId}`;
+                
+                // 4. Show the modal
+                openModal('addOrderModal');
+            } catch (err) {
+                console.error("Error fetching product:", err);
+                alert("ไม่สามารถดึงข้อมูลสินค้าได้");
+            }
+        }
+
+        //ถ้าเปิด overlay แล้วไปกด click ด้านนอกจะออกให้อัตโนมัติ
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
 </body>
 </html>

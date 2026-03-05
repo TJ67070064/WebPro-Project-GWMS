@@ -155,6 +155,7 @@
             openModal('editUserModal');
         }
 
+        //ถ้าเปิด overlay แล้วไปกด click ด้านนอกจะออกให้อัตโนมัติ
         window.onclick = function (event) {
             if (event.target.classList.contains('modal-overlay')) {
                 event.target.classList.remove('active');
