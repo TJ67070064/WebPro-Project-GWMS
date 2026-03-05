@@ -169,7 +169,7 @@ app.get('/inventory', (req, res) => {
     if (!req.session.user) return res.redirect('/');
     
     // ดึงข้อมูลสินค้าทั้งหมดจากฐานข้อมูล
-    db.all(`SELECT * FROM products`, [], (err, rows) => {
+    db.all(`SELECT * FROM Products`, [], (err, rows) => {
         if (err) {
             console.error(err.message);
             return res.status(500).send("Database Error");
@@ -181,6 +181,27 @@ app.get('/inventory', (req, res) => {
             currentPage: 'inventory',
             products: rows
         });
+    });
+});
+
+app.post('/inventory/add', (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+
+    const { name, details, brand, category, sku, zone, quantity } = req.body;
+    let icon = 'inventory_2';
+    if (category === 'Electric') icon = 'electric_bolt';
+    else if (category === 'Acoustic') icon = 'music_note';
+    else if (category === 'Accessory') icon = 'cable';
+
+    const sql = `INSERT INTO Products (name, details, brand, category, sku, zone, quantity, icon) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [name, details, brand, category, sku, zone, parseInt(quantity), icon], function (err) {
+        if (err) {
+            console.error('Error adding product:', err.message);
+            return res.status(500).send("Error adding product. SKU might already exist.");
+        }
+        res.redirect('/inventory');
     });
 });
 
