@@ -81,14 +81,14 @@ const db = new sqlite3.Database('./database.db', (err) => {
 
                 FOREIGN KEY (item_id) REFERENCES Products(id),
                 FOREIGN KEY (user_id) REFERENCES Users(id)
-                )`)
+                )`);
 
-            const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
-                                VALUES (?, ?, ?, ?, ?)`;
+            // const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
+            //                     VALUES (?, ?, ?, ?, ?)`;
 
-            db.run(insertOrder, [1, 1, 'Pending', 'Walk-in order', 12]);
-            db.run(insertOrder, [2, 2, 'Picking', 'Online order #1001', 14]);
-            db.run(insertOrder, [3, 1, 'Completed', 'Acoustic sale', 15]);
+            // db.run(insertOrder, [1, 1, 'Pending', 'Walk-in order', 12]);
+            // db.run(insertOrder, [2, 2, 'Picking', 'Online order #1001', 14]);
+            // db.run(insertOrder, [3, 1, 'Completed', 'Acoustic sale', 15]);
         });
     }
 });
@@ -110,8 +110,10 @@ app.post('/login', (req, res) => {
             return res.render('login', { error: 'ระบบฐานข้อมูลขัดข้อง' });
         }
         
+        //session user ที่เก็บไว้
         if (row) {
             req.session.user = {
+                id: row.id,
                 name: row.name,
                 role: row.role
             };
@@ -182,6 +184,23 @@ app.get('/inventory', (req, res) => {
     });
 });
 
+app.post('/inventory/add-order/:id', (req, res) => { //routing หลังจากเพิ่มใบเบิก
+    // if (!req.session.user) return res.redirect('/');
+    const item_id = req.params.id;
+    const { quantity, detail } = req.body;
+    const user_id = req.session.user.id;
+
+    const insertOrder = `INSERT INTO Orders(item_id, user_id, status, detail, order_quantity)
+                        VALUES(?, ?, ?, ?, ?);`;
+    db.run(insertOrder, [item_id, user_id, "อยู่ระหว่างการเบิก", detail, quantity], (err) => {
+        if (err) {
+            return console.error(err);
+        }
+    });
+    console.log("Insert order successfully!");
+    res.redirect('/inventory');
+});
+
 // ==========================================
 // 5. ระบบจัดการแอดมิน (Admin Tools)
 // ==========================================
@@ -200,8 +219,8 @@ app.get('/admintool', requireAdmin, (req, res) => {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
-        res.render('admintool', { 
-            dbUsers: rows, 
+        res.render('admintool', {
+            dbUsers: rows,
             user: req.session.user,
             currentPage: 'admin'
         });
@@ -238,7 +257,7 @@ app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
 
 // 6. เข้าสู่หน้า Order Management
 app.get('/orders', (req, res) => {
-const selectOrders = `SELECT
+    const selectOrders = `SELECT
                     Orders.order_id,
                     Orders.timestamp,
                     Orders.order_quantity,

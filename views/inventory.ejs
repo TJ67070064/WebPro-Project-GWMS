@@ -157,7 +157,7 @@
 
         <footer class="dash-footer">
             <div style="display: flex; gap: 10px; align-items: center;">
-                <strong style="color: var(--primary);">GWMS</strong> 
+                <strong style="color: var(--primary);">GWMS</strong>
             </div>
             <div style="text-transform: uppercase; letter-spacing: 1px;">
                 © 2026 Guitar Warehouse Systems. Secure Connection.
@@ -176,17 +176,23 @@
         <div class="modal-box">
             <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">Product Name</h2>
             <p id="modalDetails" style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Details</p>
-            <form id="orderForm" method="POST" action="/orders/add">
+            <!-- action เป็น empty ก่อน ไปเพิ่มใน function ด้านล่าง -->
+            <form id="orderForm" method="POST" action="">
                 <input type="hidden" name="productId" id="modalProductId">
 
                 <div class="form-group">
-                    <label>จำนวนที่ต้องการสั่ง</label>
-                    <input type="number" name="quantity" class="form-control" required min="1" placeholder="ใส่จำนวน...">
+                    <label>จำนวนที่ต้องการสั่ง มีทั้งหมด <span id="currentQuantity" style="color: var(--warning);"></span> ชิ้น</label>
+                    <input id="quantityInput" type="number" name="quantity" class="form-control" required min="1" placeholder="ใส่จำนวน..." value="1">
+                </div>
+
+                <div class="form-group">
+                    <label>ระบุรายละเอียดออเดอร์</label>
+                    <input id="detailInput" type="text" name="detail" class="form-control" required placeholder="รายละเอียด...">
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                    <button type="button" onclick="closeModal('addOrderModal')" class="btn-text">Cancel</button>
-                    <button type="submit" class="btn-primary" style="width: auto;">Confirm Order</button>
+                    <button type="button" onclick="closeModal('addOrderModal')" class="btn-text">ยกเลิก</button>
+                    <button type="submit" class="btn-primary" style="width: auto;">ยืนยันออเดอร์</button>
                 </div>
             </form>
         </div>
@@ -211,17 +217,20 @@
             try {
                 // 1. Ask the server for the data
                 const response = await fetch('/api/product/' + productId);
-                
+
                 if (!response.ok) throw new Error('Product not found');
 
                 // 2. Convert to object
                 const product = await response.json();
 
                 // 3. Inject the data into the HTML elements we gave IDs to
-                document.getElementById('modalProductName').innerText = "สั่งซื้อ: " + product.name;
+                document.getElementById('modalProductName').innerText = "เบิกสินค้า: " + product.name;
                 document.getElementById('modalDetails').innerText = product.details + " (" + product.sku + ")";
                 document.getElementById('modalProductId').value = product.id;
-
+                document.getElementById('currentQuantity').innerHTML = product.quantity;
+                document.getElementById('quantityInput').max = product.quantity;
+                document.getElementById('orderForm').action = `/inventory/add-order/${productId}`;
+                
                 // 4. Show the modal
                 openModal('addOrderModal');
             } catch (err) {
