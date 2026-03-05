@@ -5,13 +5,13 @@
                 <span class="material-symbols-outlined">music_note</span>
                 GWMS
             </div>
-            
+
             <nav class="nav-menu">
                 <% if (user && (user.role === 'admin' || user.role === 'manager')) { %>
                     <a href="/home" class="nav-item <%= currentPage === 'home' ? 'active' : '' %>">แดชบอร์ด</a>
                 <% } %>
-                
-                <a href="/orders" class="nav-item <%= currentPage === 'orders' ? 'active' : '' %>">รายการสั้งซื้อ</a>
+
+                <a href="/orders" class="nav-item <%= currentPage === 'orders' ? 'active' : '' %>">รายการสั่งซื้อ</a>
                 <a href="/history" class="nav-item <%= currentPage === 'history' ? 'active' : '' %>">ประวัติ</a>
                 <a href="/inventory" class="nav-item <%= currentPage === 'inventory' ? 'active' : '' %>">คลังสินค้า</a>
                 
