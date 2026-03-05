@@ -19,14 +19,10 @@
         
         <div class="page-header">
             <div>
-                <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--primary); font-weight: 700; margin-bottom: 5px;">Warehouse Logistics</p>
-                <h2>Inventory List</h2>
-                <p>Centralized management for warehouse assets. Monitor real-time stock levels and track serial numbers.</p>
+                <h2>รายการสินค้า</h2>
+                
             </div>
             <div class="btn-group">
-                <button class="btn-outline">
-                    <span class="material-symbols-outlined">file_download</span> Export Data
-                </button>
                 <button class="btn-primary">
                     <span class="material-symbols-outlined">add_circle</span> Add Product
                 </button>
@@ -35,7 +31,7 @@
 
         <div class="filter-bar">
             <div class="form-group" style="margin-bottom: 0;">
-                <label>Search Query</label>
+                <label>คำค้นหา</label>
                 <div class="input-wrapper">
                     <span class="material-symbols-outlined icon">search</span>
                     <input type="text" class="form-control" placeholder="Search by name, SKU, or serial...">
@@ -43,7 +39,7 @@
             </div>
             
             <div class="form-group" style="margin-bottom: 0;">
-                <label>Manufacturer</label>
+                <label>โรงงานผลิต</label>
                 <select class="form-control">
                     <option value="">All Brands</option>
                     <option value="Fender">Fender</option>
@@ -55,7 +51,7 @@
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
-                <label>Stock Status</label>
+                <label>สถานะ</label>
                 <select class="form-control">
                     <option value="">All Statuses</option>
                     <option value="instock">In Stock</option>
@@ -70,13 +66,13 @@
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th>Product Details</th>
-                        <th>Brand</th>
-                        <th>Inventory ID</th>
-                        <th>Zone</th>
-                        <th style="text-align: center;">Qty</th>
-                        <th>Status</th>
-                        <th style="text-align: right;">Actions</th>
+                        <th>รายละเอียดสินค้า</th>
+                        <th>แบรนด์</th>
+                        <th>ID สินค้า</th>
+                        <th>โซนจัดเก็บ</th>
+                        <th style="text-align: center;">จำนวน</th>
+                        <th>สถานะ</th>
+                        <th style="text-align: right;">จัดการ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -143,7 +139,7 @@
                         <tr>
                             <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">
                                 <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 10px;">inventory_2</span>
-                                <p>No products found in inventory.</p>
+                                <p>ไม่พบสินค้า สินค้าหมด.</p>
                             </td>
                         </tr>
                     <% } %>
@@ -151,7 +147,7 @@
             </table>
 
             <div class="pagination-wrapper">
-                <div class="pagination-info">Showing <strong>1</strong> to <strong><%= products ? products.length : 0 %></strong> of <strong><%= products ? products.length : 0 %></strong> results</div>
+                <div class="pagination-info">แสดง <strong>1</strong> – <strong><%= products ? products.length : 0 %></strong> : <strong><%= products ? products.length : 0 %></strong> ผลลัพท์</div>
                 <div class="pagination">
                     <a href="#" class="page-item"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_left</span></a>
                     <a href="#" class="page-item active">1</a>
@@ -163,7 +159,6 @@
         <footer class="dash-footer">
             <div style="display: flex; gap: 10px; align-items: center;">
                 <strong style="color: var(--primary);">GWMS</strong> 
-                <span>v2.4.1 (Stable)</span>
             </div>
             <div style="text-transform: uppercase; letter-spacing: 1px;">
                 © 2026 Guitar Warehouse Systems. Secure Connection.

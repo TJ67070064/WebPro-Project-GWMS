@@ -40,10 +40,11 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 role TEXT
             )`);
 
-            // ใส่ข้อมูล User จำลอง
+            // ใส่ข้อมูล User 
             const insertUsers = `INSERT OR IGNORE INTO Users (username, password, name, role) VALUES 
-                ('admin', '1234', 'TJ', 'admin'),
-                ('staff1', '1234', 'Somchai', 'staff')`;
+                ('admin', '1234', 'Somsri', 'admin'),
+                ('staff1', '1234', 'Somchai', 'staff'),
+                ('manager', '1234', 'Somyod', 'manager')`;
             db.run(insertUsers);
 
             // --- สร้างตาราง products สำหรับหน้า Inventory ---
@@ -114,9 +115,13 @@ app.post('/login', (req, res) => {
                 name: row.name,
                 role: row.role
             };
-            res.redirect('/home');
-        } else {
-            res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง' });
+            
+            // แยกเส้นทางตาม Role
+            if (row.role === 'staff') {
+                res.redirect('/inventory'); // Staff ไปหน้าจัดของเลย
+            } else {
+                res.redirect('/home'); // Admin กับ Manager ไปดูภาพรวม Dashboard
+            }
         }
     });
 });
@@ -129,7 +134,15 @@ app.get('/logout', (req, res) => {
 // ==========================================
 // 4. หน้าหลัก (Home & Inventory)
 // ==========================================
-app.get('/home', (req, res) => {
+
+const requireManagerOrAdmin = (req, res, next) => {
+    if (!req.session.user || (req.session.user.role !== 'admin' && req.session.user.role !== 'manager')) {
+        return res.redirect('/inventory'); // ถ้าเป็นแค่ staff ให้เด้งไปหน้าคลังสินค้า
+    }
+    next();
+};
+
+app.get('/home', requireManagerOrAdmin, (req, res) => {
     if (!req.session.user) return res.redirect('/');
     
     res.render('home', {
@@ -137,6 +150,18 @@ app.get('/home', (req, res) => {
         currentPage: 'home'
     });
 });
+
+app.get('/history', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/');
+    }
+    // เพิ่ม currentPage: 'home' เพื่อให้ Navbar รู้ว่าต้องไฮไลท์เมนูไหน
+    res.render('history', { 
+        user: req.session.user,
+        currentPage: 'history' 
+    });
+});
+
 
 app.get('/inventory', (req, res) => {
     if (!req.session.user) return res.redirect('/');
