@@ -80,13 +80,13 @@
                     <label>ค้นหาสินค้า</label>
                     <div class="input-wrapper">
                         <span class="material-symbols-outlined icon">search</span>
-                        <input type="text" class="form-control" placeholder="ค้นหาด้วยชื่อ, SKU หรือซีเรียล...">
+                        <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาด้วยชื่อ หรือ SKU...">
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>ผู้ผลิต / แบรนด์</label>
-                    <select class="form-control">
+                    <select id="brandFilter" class="form-control">
                         <option value="">ทุกแบรนด์</option>
                         <option value="Fender">Fender</option>
                         <option value="Gibson">Gibson</option>
@@ -98,7 +98,7 @@
 
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>สถานะสต็อก</label>
-                    <select class="form-control">
+                    <select id="statusFilter" class="form-control">
                         <option value="">ทุกสถานะ</option>
                         <option value="instock">มีสินค้า</option>
                         <option value="lowstock">สินค้าใกล้หมด</option>
@@ -127,15 +127,18 @@
                                     let qtyColor = 'white';
                                     let badgeClass = 'success';
                                     let statusText = 'มีสินค้า';
+                                    let filterStatus = 'instock'; // สร้างตัวแปรสำหรับ filter
 
                                     if (product.quantity == 0) {
                                         qtyColor = 'var(--danger)';
                                         badgeClass = 'danger';
                                         statusText = 'สินค้าหมด';
+                                        filterStatus = 'outstock';
                                     } else if (product.quantity <= 5) {
                                         qtyColor = 'var(--warning)';
                                         badgeClass = 'warning';
                                         statusText = 'สินค้าใกล้หมด';
+                                        filterStatus = 'lowstock';
                                     }
 
                                     let dotColor = 'cyan';
@@ -143,7 +146,10 @@
                                     else if (product.category === 'Accessory') dotColor = 'purple';
                                 %>
 
-                                <tr>
+                                <tr class="product-row" 
+                                    data-search="<%= product.name.toLowerCase() %> <%= product.sku.toLowerCase() %>" 
+                                    data-brand="<%= product.brand %>" 
+                                    data-status="<%= filterStatus %>">
                                     <td>
                                         <div class="product-cell">
                                             <div class="icon-box" style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
@@ -207,7 +213,7 @@
                 </table>
 
                 <div class="pagination-wrapper">
-                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong><%= products ? products.length : 0 %></strong> จากทั้งหมด <strong><%= products ? products.length : 0 %></strong> รายการ</div>
+                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong id="visibleCount"><%= products ? products.length : 0 %></strong> จากทั้งหมด <strong><%= products ? products.length : 0 %></strong> รายการ</div>
                     <div class="pagination">
                         <a href="#" class="page-item"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_left</span></a>
                         <a href="#" class="page-item active">1</a>
@@ -364,13 +370,10 @@
         </div>
 
         <script>
-            // ฟังก์ชันเปิด Modal แก้ไขและเติมข้อมูลเดิม
+            // ฟังก์ชัน Modal Edit
             function openEditProductModal(btn) {
-                // เซ็ต Action ของฟอร์ม
                 const id = btn.getAttribute('data-id');
                 document.getElementById('editProductForm').action = '/inventory/edit/' + id;
-                
-                // ดึงข้อมูลมาหยอดลงใน Input
                 document.getElementById('editName').value = btn.getAttribute('data-name');
                 document.getElementById('editSku').value = btn.getAttribute('data-sku');
                 document.getElementById('editBrand').value = btn.getAttribute('data-brand');
@@ -379,17 +382,62 @@
                 document.getElementById('editQuantity').value = btn.getAttribute('data-quantity');
                 document.getElementById('editDetails').value = btn.getAttribute('data-details');
                 document.getElementById('editImage').value = btn.getAttribute('data-image');
-
-                // แสดง Modal
                 document.getElementById('editModal').style.display = 'flex';
             }
 
-            // ฟังก์ชันปิด Modal เมื่อคลิกพื้นที่ว่างข้างนอก
             window.onclick = function (event) {
                 if (event.target.classList.contains('modal-overlay')) {
                     event.target.style.display = 'none';
                 }
             }
+
+            // ==========================================
+            // ระบบ Filter สินค้าแบบ Real-time
+            // ==========================================
+            document.addEventListener('DOMContentLoaded', () => {
+                const searchInput = document.getElementById('searchInput');
+                const brandFilter = document.getElementById('brandFilter');
+                const statusFilter = document.getElementById('statusFilter');
+                const productRows = document.querySelectorAll('.product-row');
+                const visibleCountDisplay = document.getElementById('visibleCount');
+
+                function filterTable() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const selectedBrand = brandFilter.value;
+                    const selectedStatus = statusFilter.value;
+                    
+                    let visibleCount = 0;
+
+                    productRows.forEach(row => {
+                        const rowSearchText = row.getAttribute('data-search');
+                        const rowBrand = row.getAttribute('data-brand');
+                        const rowStatus = row.getAttribute('data-status');
+
+                        // เช็คเงื่อนไข
+                        const matchesSearch = rowSearchText.includes(searchTerm);
+                        const matchesBrand = selectedBrand === "" || rowBrand === selectedBrand;
+                        const matchesStatus = selectedStatus === "" || rowStatus === selectedStatus;
+
+                        // ถ้าตรงทุกเงื่อนไข ให้โชว์แถวนี้
+                        if (matchesSearch && matchesBrand && matchesStatus) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // อัปเดตตัวเลขจำนวนรายการที่แสดงผลอยู่
+                    if(visibleCountDisplay) {
+                        visibleCountDisplay.textContent = visibleCount;
+                    }
+                }
+
+                // ดักจับ Event เมื่อมีการพิมพ์หรือเปลี่ยนตัวเลือก
+                searchInput.addEventListener('input', filterTable);
+                brandFilter.addEventListener('change', filterTable);
+                statusFilter.addEventListener('change', filterTable);
+            });
         </script>
 
 </body>
