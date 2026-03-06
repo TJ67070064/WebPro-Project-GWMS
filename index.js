@@ -44,6 +44,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
             // ใส่ข้อมูล User จำลอง
             const insertUsers = `INSERT OR IGNORE INTO Users (username, password, name, role) VALUES 
                 ('admin', '1234', 'TJ', 'admin'),
+                ('manager', '1234', 'Somyod', 'manager'),
                 ('staff1', '1234', 'Somchai', 'staff')`;
             db.run(insertUsers);
 
@@ -115,7 +116,13 @@ app.post('/login', (req, res) => {
                 name: row.name,
                 role: row.role
             };
-            res.redirect('/home');
+            
+            // แยกเส้นทางเข้าหน้าเว็บตาม Role
+            if (row.role === 'staff') {
+                res.redirect('/inventory'); // Staff ไปหน้าคลังสินค้าเลย
+            } else {
+                res.redirect('/home'); // Admin กับ Manager ไปหน้า Dashboard
+            }
         } else {
             res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง' });
         }
@@ -133,16 +140,41 @@ app.get('/logout', (req, res) => {
 app.get('/home', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
-    res.render('home', {
-        user: req.session.user,
-        currentPage: 'home'
+    // ป้องกันไม่ให้ staff แอบเข้ามาหน้า Dashboard
+    if (req.session.user.role === 'staff') {
+        return res.redirect('/inventory');
+    }
+
+    // ดึงสถิติต่างๆ จากฐานข้อมูลเพื่อส่งให้หน้า Dashboard
+    const sqlStats = `
+        SELECT 
+            (SELECT SUM(quantity) FROM Inventory) AS totalStock,
+            (SELECT COUNT(*) FROM Inventory WHERE quantity <= 5 AND quantity > 0) AS lowStock,
+            (SELECT COUNT(*) FROM Orders WHERE status = 'Pending') AS pendingOrders,
+            (SELECT COUNT(*) FROM Inventory WHERE quantity > 50) AS overStock
+    `;
+
+    db.get(sqlStats, [], (err, stats) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
+        }
+
+        // ส่งตัวแปรทั้งหมดไปให้ home.ejs
+        res.render('home', {
+            user: req.session.user,
+            currentPage: 'home',
+            totalStock: stats.totalStock || 0,
+            lowStock: stats.lowStock || 0,
+            pendingOrders: stats.pendingOrders || 0,
+            overStock: stats.overStock || 0
+        });
     });
 });
 
 app.get('/history', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/');
-    }
+    if (!req.session.user) return res.redirect('/');
+    
     res.render('history', { 
         user: req.session.user,
         currentPage: 'history' 
@@ -189,6 +221,7 @@ app.post('/inventory/add', (req, res) => {
     });
 });
 
+// Route สำหรับรับข้อมูลแก้ไขสินค้า (Edit Product)
 app.post('/inventory/edit/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
@@ -210,6 +243,24 @@ app.post('/inventory/edit/:id', (req, res) => {
             return res.status(500).send("Error updating product.");
         }
         res.redirect('/inventory'); // อัปเดตเสร็จให้กลับไปหน้าคลังสินค้า
+    });
+});
+
+// Route สำหรับลบสินค้า (Delete Product)
+app.post('/inventory/delete/:id', (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+
+    const productId = req.params.id;
+
+    // คำสั่ง SQL ลบข้อมูลออกจากตาราง Inventory
+    const sql = `DELETE FROM Inventory WHERE id = ?`;
+
+    db.run(sql, productId, function (err) {
+        if (err) {
+            console.error('Error deleting product:', err.message);
+            return res.status(500).send("Error deleting product.");
+        }
+        res.redirect('/inventory'); 
     });
 });
 
