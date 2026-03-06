@@ -1,0 +1,76 @@
+/* =========================================
+   5. Dashboard Specific (Navbar & Layout)
+   ========================================= */
+.dash-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(26, 26, 27, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(238, 173, 43, 0.1);
+    height: 70px;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+}
+
+.nav-container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.logo-small {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+}
+
+.logo-icon {
+    width: 40px; height: 40px;
+    background: rgba(238, 173, 43, 0.2);
+    color: var(--primary);
+    border-radius: 8px;
+    display: flex; justify-content: center; align-items: center;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.nav-item {
+    padding: 8px 16px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    color: var(--primary);
+    background: rgba(238, 173, 43, 0.05);
+}
+
+.nav-item.active {
+    background: var(--primary);
+    color: #1a1a1b;
+}
