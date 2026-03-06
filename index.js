@@ -27,7 +27,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
         console.error('Error opening database', err.message);
     } else {
-        console.log('Connected to the gwms.db SQLite database.');
+        console.log('Connected to the database.db SQLite database.');
 
         db.serialize(() => {
             db.run("PRAGMA foreign_keys = ON"); //Enable foreign keys
@@ -47,7 +47,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 ('staff1', '1234', 'Somchai', 'staff')`;
             db.run(insertUsers);
 
-            // --- สร้างตาราง Inventory ใหม่ ---
+            // --- สร้างตาราง Inventory (เปลี่ยน icon เป็น image) ---
             db.run(`CREATE TABLE IF NOT EXISTS Inventory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
@@ -57,16 +57,16 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 sku TEXT UNIQUE,
                 zone TEXT,
                 quantity INTEGER,
-                icon TEXT
+                image TEXT
             )`);
 
-            // ใส่ข้อมูลสินค้าจำลองตั้งต้นลงในตาราง Inventory
-            const insertInventory = `INSERT OR IGNORE INTO Inventory (name, details, brand, category, sku, zone, quantity, icon) VALUES 
-                ('Stratocaster Pro II', 'Dark Night', 'Fender', 'Electric', 'FND-STR-001', 'Zone A / Rack 12', 12, 'electric_car'),
-                ('Les Paul Standard', 'Heritage Cherry Sunburst', 'Gibson', 'Electric', 'GIB-LP-050', 'Zone A / Rack 08', 2, 'electric_car'),
-                ('D-28 Acoustic', 'Natural', 'Martin', 'Acoustic', 'MAR-D28-002', 'Zone B / Shelf 02', 5, 'music_note'),
-                ('RG550 Genesis', 'Desert Sun Yellow', 'Ibanez', 'Electric', 'IBZ-RG-112', 'Zone A / Rack 22', 0, 'electric_bolt'),
-                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'cable')`;
+            // ใส่ข้อมูลสินค้าจำลอง (พร้อมรูปตัวอย่าง)
+            const insertInventory = `INSERT OR IGNORE INTO Inventory (name, details, brand, category, sku, zone, quantity, image) VALUES 
+                ('Stratocaster Pro II', 'Dark Night', 'Fender', 'Electric', 'FND-STR-001', 'Zone A / Rack 12', 12, 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?q=80&w=200&auto=format&fit=crop'),
+                ('Les Paul Standard', 'Heritage Cherry Sunburst', 'Gibson', 'Electric', 'GIB-LP-050', 'Zone A / Rack 08', 2, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
+                ('D-28 Acoustic', 'Natural', 'Martin', 'Acoustic', 'MAR-D28-002', 'Zone B / Shelf 02', 5, 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=200&auto=format&fit=crop'),
+                ('RG550 Genesis', 'Desert Sun Yellow', 'Ibanez', 'Electric', 'IBZ-RG-112', 'Zone A / Rack 22', 0, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
+                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'https://images.unsplash.com/photo-1621255799738-f860fb41f103?q=80&w=200&auto=format&fit=crop')`;
             db.run(insertInventory);
 
             // --- สร้างตาราง Order ---
@@ -85,7 +85,6 @@ const db = new sqlite3.Database('./database.db', (err) => {
             const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
                                  SELECT ?, ?, ?, ?, ?
                                  WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 1)`;
-            // ใส่ข้อมูลจำลองออเดอร์ (ป้องกันการใส่ซ้ำเมื่อรันเซิร์ฟเวอร์ใหม่)
             db.run(insertOrder, [1, 1, 'Pending', 'Walk-in order', 12]);
             db.run(`INSERT INTO Orders (item_id, user_id, status, detail, order_quantity) SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 2)`, [2, 2, 'Picking', 'Online order #1001', 14]);
             db.run(`INSERT INTO Orders (item_id, user_id, status, detail, order_quantity) SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 3)`, [3, 1, 'Completed', 'Acoustic sale', 15]);
@@ -140,6 +139,16 @@ app.get('/home', (req, res) => {
     });
 });
 
+app.get('/history', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/');
+    }
+    res.render('history', { 
+        user: req.session.user,
+        currentPage: 'history' 
+    });
+});
+
 app.get('/inventory', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
@@ -158,25 +167,49 @@ app.get('/inventory', (req, res) => {
     });
 });
 
-// Route สำหรับรับข้อมูลเพิ่มสินค้าใหม่
+// Route สำหรับรับข้อมูลเพิ่มสินค้าใหม่ (รองรับรูปภาพ)
 app.post('/inventory/add', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
-    const { name, details, brand, category, sku, zone, quantity } = req.body;
-    let icon = 'inventory_2';
-    if (category === 'Electric') icon = 'electric_bolt';
-    else if (category === 'Acoustic') icon = 'music_note';
-    else if (category === 'Accessory') icon = 'cable';
+    const { name, details, brand, category, sku, zone, quantity, image } = req.body;
+    
+    // ตั้งค่ารูปภาพ Default ในกรณีที่ไม่ได้ใส่ลิงก์มา
+    const defaultImage = 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop';
+    const finalImage = image ? image : defaultImage;
 
-    const sql = `INSERT INTO Inventory (name, details, brand, category, sku, zone, quantity, icon) 
+    const sql = `INSERT INTO Inventory (name, details, brand, category, sku, zone, quantity, image) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    db.run(sql, [name, details, brand, category, sku, zone, parseInt(quantity), icon], function (err) {
+    db.run(sql, [name, details, brand, category, sku, zone, parseInt(quantity), finalImage], function (err) {
         if (err) {
             console.error('Error adding product:', err.message);
             return res.status(500).send("Error adding product. SKU might already exist.");
         }
         res.redirect('/inventory');
+    });
+});
+
+app.post('/inventory/edit/:id', (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+
+    const productId = req.params.id;
+    const { name, details, brand, category, zone, quantity, image } = req.body;
+    
+    // ตั้งค่ารูปภาพ Default ในกรณีที่ลบลิงก์ออกจนว่างเปล่า
+    const defaultImage = 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop';
+    const finalImage = image ? image : defaultImage;
+
+    // คำสั่ง SQL อัปเดตข้อมูล (ไม่ต้องอัปเดต SKU เพราะเป็นรหัสเฉพาะ)
+    const sql = `UPDATE Inventory 
+                 SET name = ?, details = ?, brand = ?, category = ?, zone = ?, quantity = ?, image = ? 
+                 WHERE id = ?`;
+
+    db.run(sql, [name, details, brand, category, zone, parseInt(quantity), finalImage, productId], function (err) {
+        if (err) {
+            console.error('Error updating product:', err.message);
+            return res.status(500).send("Error updating product.");
+        }
+        res.redirect('/inventory'); // อัปเดตเสร็จให้กลับไปหน้าคลังสินค้า
     });
 });
 
@@ -266,13 +299,13 @@ app.get('/orders', (req, res) => {
 //API ==============================
 app.get('/api/product/:id', (req, res) => {
     const productId = req.params.id;
-    const sql = `SELECT * FROM Products WHERE id = ?`;
+    // แก้ไขจาก Products เป็น Inventory ให้ตรงกับชื่อตารางปัจจุบัน
+    const sql = `SELECT * FROM Inventory WHERE id = ?`;
 
     db.get(sql, [productId], (err, row) => {
         if (err || !row) {
             return res.status(404).json({ error: "Product not found" });
         }
-        // Send the data back as a JSON object (res.json() จะส่งข้อมูลกลับไปเป็น json)
         console.log("Send data from /api/product/:id back with ", row);
         res.json(row);
     });
