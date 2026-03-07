@@ -25,7 +25,7 @@
                     <input type="text" class="form-control" placeholder="ค้นหา...">
                 </div>
                 <div>
-                    <button onclick="openModal('addOrderModal')" class="btn-primary" style="width: auto; padding: 10px 20px; margin-top: 0;">
+                    <button onclick="openShowInventory('showInventoryModal')" class="btn-primary" style="width: auto; padding: 10px 20px; margin-top: 0;">
                         <span class="material-symbols-outlined">add_notes</span>เพิ่มออเดอร์
                     </button>
                 </div>
@@ -83,5 +83,100 @@
             </table>
         </section>
     </main>
+
+    <!-- Overlay สำหรับโชว์รายการสินค้าทั้งหมด เพื่อสร้าง Order อีกที -->
+    <section class="modal-overlay" id="showInventoryModal">
+        <div class="modal-box">
+            <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">รายการสินค้าทั้งหมดที่สามารถเพิ่มได้</h2>
+            <!-- <form id="orderForm" method="POST" action="/orders/add"> -->
+            <table>
+                <thead>
+                    <tr>
+                        <!-- ตามใน Inventory เลย -->
+                        <th>รายละเอียดสินค้า</th>
+                        <th>รหัสสินค้า</th>
+                        <th>จำนวน</th>
+                        <th>สร้างออเดอร์</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Overlay สำหรับการใส่ Quantity เพื่อสร้าง Order ของสินค้านั้น -->
+    <section class="modal-overlay" id="addOrderModal">
+        <div class="modal-box">
+            <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">รายการสินค้า</h2>
+            <p>เลือกจำนวนที่สินค้าสำหรับออเดอร์</p>
+            <form id="addOrderForm" method="POST">
+            <!-- action="/orders/add-orders/:id" เพิ่ม action ใน function-->
+                <img id="addOrderImg">
+                <h4 id="addOrderName"></h4>
+                <h4 id="addOrderQty"></h4>
+                <div>
+                    <label class="modal-label" for="quantity">จำนวนที่ต้องการเบิกในออเดอร์</label>
+                    <input type="number" id="addMaxQuantity" name="quantity" required min="1" class="form-control modal-input">
+                </div>
+                <button type="submit">สร้างออเดอร์</button>
+            </form>
+        </div>
+    </section>
+
+    
+
+    <script>
+        async function openShowInventory() {
+            const response = await fetch('/orders/add-orders');
+            const inventory = await response.json();
+            const tableBody = document.getElementById("inventoryTableBody");
+            tableBody.innerHTML = ""; //เคลียร์ body ก่อน
+            inventory.forEach((row) => {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${row.name}</td>
+                            <td>${row.sku}</td>
+                            <td>${row.quantity}</td>
+                            <td><button onclick="showProduct(${row.id})">+</button></td>
+                        </tr>
+                        `
+            });
+            openModal("showInventoryModal");
+        }
+
+        async function showProduct(itemId) {
+            const response = await fetch(`/api/product/${itemId}`);
+            const inventory = await response.json();
+            
+            document.getElementById("addMaxQuantity").max = inventory.quantity;
+            document.getElementById("addMaxQuantity").value = 1; //Reset default quantity
+            document.getElementById("addOrderForm").action = `/orders/add-orders/${itemId}`;
+            document.getElementById("addOrderImg").src = inventory.image;
+            document.getElementById("addOrderName").innerHTML = inventory.name;
+            document.getElementById("addOrderQty").innerHTML = inventory.quantity;
+
+            closeModal("showInventoryModal");
+            openModal("addOrderModal");
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            modal.classList.add('active'); // เผื่อ style.css ต้องการ class นี้
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
+
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal(event.target.id);
+            }
+        }
+    </script>
 </body>
 </html>

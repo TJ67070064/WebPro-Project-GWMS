@@ -84,8 +84,8 @@ const db = new sqlite3.Database('./database.db', (err) => {
             )`);
 
             const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
-                                 SELECT ?, ?, ?, ?, ?
-                                 WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 1)`;
+                                SELECT ?, ?, ?, ?, ?
+                                WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 1)`;
             db.run(insertOrder, [1, 1, 'Pending', 'Walk-in order', 12]);
             db.run(`INSERT INTO Orders (item_id, user_id, status, detail, order_quantity) SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 2)`, [2, 2, 'Picking', 'Online order #1001', 14]);
             db.run(`INSERT INTO Orders (item_id, user_id, status, detail, order_quantity) SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 3)`, [3, 1, 'Completed', 'Acoustic sale', 15]);
@@ -350,6 +350,27 @@ app.get('/orders', (req, res) => {
             orders: rows
         })
     })
+});
+
+app.get('/orders/add-orders', (req, res) => {
+    const allProduct = `SELECT id, name, quantity, image, sku FROM Inventory;`;
+    db.all(allProduct, (err, rows) => {
+        if (err) {
+            return res.status(500).send("Database Error");
+        }
+        res.json(rows);
+    });
+});
+
+app.post('/orders/add-orders/:id', (req, res) => {
+    const allProduct = `INSERT INTO Orders
+                        VALUES(?, ?, ?);`;
+    db.all(allProduct, (err, rows) => {
+        if (err) {
+            return res.status(500).send("Database Error");
+        }
+        res.json(rows);
+    });
 });
 
 // ==========================================
