@@ -200,16 +200,6 @@ app.get('/home', (req, res) => {
     });
 });
 
-
-app.get('/history', (req, res) => {
-    if (!req.session.user) return res.redirect('/');
-    
-    res.render('history', { 
-        user: req.session.user,
-        currentPage: 'history' 
-    });
-});
-
 app.get('/inventory', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
@@ -283,6 +273,7 @@ app.post('/inventory/edit/:id', (req, res) => {
     });
 });
 
+//DELETE
 // Route สำหรับลบสินค้า (Delete Product)
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
@@ -302,7 +293,46 @@ app.post('/inventory/delete/:id', (req, res) => {
             console.error('Error deleting product:', err.message);
             return res.status(500).send("Error deleting product.");
         }
+
+        //keep log
+        logActivity(req.session.user.id, "DELETE_PRODUCT", productId);
         res.redirect('/inventory'); 
+    });
+});
+
+// ==========================================
+// History(Activity log)
+// ==========================================
+app.get('/history', (req, res) => {
+
+    if (!req.session.user) return res.redirect('/');
+
+    const sql = `
+    SELECT 
+        ActivityLog.log_id,
+        ActivityLog.activity_type,
+        ActivityLog.timestamp,
+        Users.name AS user_name,
+        Inventory.name AS product_name
+    FROM ActivityLog
+    LEFT JOIN Users ON ActivityLog.user_id = Users.id
+    LEFT JOIN Inventory ON ActivityLog.product_id = Inventory.id
+    ORDER BY ActivityLog.timestamp DESC
+    `;
+
+    db.all(sql, [], (err, rows) => {
+
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
+        }
+
+        res.render('history', {
+            user: req.session.user,
+            currentPage: 'history',
+            logs: rows
+        });
+
     });
 });
 
