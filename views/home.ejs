@@ -34,8 +34,8 @@
                         <span class="material-symbols-outlined">inventory_2</span>
                     </div>
                 </div>
-                <div class="stat-title">สินค้าทั้งหมด</div>
-                <div class="stat-value">1,250</div>
+                <div class="stat-title">จำนวนสินค้าทั้งหมด (ชิ้น)</div>
+                <div class="stat-value"><%= totalStock %></div>
             </div>
 
             <div class="stat-card">
@@ -46,7 +46,7 @@
                     <span class="badge danger">ตรวจสอบ</span>
                 </div>
                 <div class="stat-title">แจ้งเตือนสินค้าเหลือน้อย</div>
-                <div class="stat-value">5</div>
+                <div class="stat-value"><%= lowStock %></div>
             </div>
 
             <div class="stat-card">
@@ -55,8 +55,8 @@
                         <span class="material-symbols-outlined">pending_actions</span>
                     </div>
                 </div>
-                <div class="stat-title">รอการอนุมัติ</div>
-                <div class="stat-value">3</div>
+                <div class="stat-title">ออเดอร์รอการอนุมัติ</div>
+                <div class="stat-value"><%= pendingOrders %></div>
             </div>
 
             <div class="stat-card">
@@ -64,19 +64,19 @@
                     <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning);">
                         <span class="material-symbols-outlined">history</span>
                     </div>
-                    <span class="badge warning">> 90 วัน</span>
+                    <span class="badge warning">> 50 ชิ้น</span>
                 </div>
-                <div class="stat-title">สินค้าค้างสต็อค</div>
-                <div class="stat-value">12</div>
+                <div class="stat-title">รายการสินค้าล้นสต็อค</div>
+                <div class="stat-value"><%= overStock %></div>
             </div>
         </div>
 
         <div class="table-container">
             <div class="table-header">
-                <h3>รายการที่ใช้งานล่าสุด:</h3>
-                <a href="#"
+                <h3>รายการที่ใช้งานล่าสุด (ตัวอย่าง):</h3>
+                <a href="/history"
                     style="color: var(--primary); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                    View Full History <span class="material-symbols-outlined"
+                    ดูประวัติทั้งหมด <span class="material-symbols-outlined"
                         style="font-size: 18px;">arrow_forward</span>
                 </a>
             </div>
