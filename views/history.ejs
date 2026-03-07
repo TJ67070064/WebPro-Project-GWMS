@@ -79,7 +79,7 @@
 
         <tr>
             <td><%= log.log_id %></td>
-            
+
             <td>
             <% if (log.activity_type === "ADD_PRODUCT") { %>
                 <span class="quick-pill pill-inbound">เพิ่ม</span>
@@ -96,7 +96,7 @@
             </td>
 
             <td><%= log.timestamp %></td>
-            <td><%= log.user_name %></td>
+            <td><%= log.username %></td>
             <td><%= log.product_name || '-' %></td>
         </tr>
         <% }) %>
