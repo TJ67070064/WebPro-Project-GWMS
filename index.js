@@ -48,6 +48,16 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 ('staff1', '1234', 'Somchai', 'staff')`;
             db.run(insertUsers);
 
+            //ตาราง LoginLog 
+            db.run(`CREATE TABLE IF NOT EXISTS LoginLog (
+            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            display_name TEXT, 
+            status TEXT,
+            ip_address TEXT,
+            login_time TEXT DEFAULT (DATETIME('now', 'localtime'))
+             )`);
+
             // --- สร้างตาราง Inventory (เปลี่ยน icon เป็น image) ---
             db.run(`CREATE TABLE IF NOT EXISTS Inventory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,6 +112,11 @@ app.get('/', (req, res) => {
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
+    let ip_address = req.ip || req.socket.remoteAddress || 'Unknown IP';
+
+    if (ip_address === '::1' || ip_address === '::ffff:127.0.0.1') {
+    ip_address = '127.0.0.1 (Localhost)';
+    }
 
     const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
     db.get(sql, [username, password], (err, row) => {
@@ -111,6 +126,10 @@ app.post('/login', (req, res) => {
         }
 
         if (row) {
+            // ล็อกอินสำเร็จ -> บันทึก Log สถานะ Success
+            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
+                   [username, row.name, 'Success', ip_address]);
+
             req.session.user = {
                 id: row.id,
                 name: row.name,
@@ -124,6 +143,10 @@ app.post('/login', (req, res) => {
                 res.redirect('/home'); // Admin กับ Manager ไปหน้า Dashboard
             }
         } else {
+            // ล็อกอินไม่สำเร็จ -> บันทึก Log สถานะ Failed (ชื่อผู้ใช้เป็น Unknown)
+            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
+                   [username, 'Unknown', 'Failed', ip_address]);
+
             res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง' });
         }
     });
@@ -137,6 +160,7 @@ app.get('/logout', (req, res) => {
 // ==========================================
 // 4. หน้าหลัก (Home & Inventory)
 // ==========================================
+
 app.get('/home', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
@@ -156,28 +180,39 @@ app.get('/home', (req, res) => {
 
     db.get(sqlStats, [], (err, stats) => {
         if (err) {
-            console.error(err.message);
+            console.error("Error fetching stats:", err.message);
             return res.status(500).send("Database Error");
         }
 
-        // ส่งตัวแปรทั้งหมดไปให้ home.ejs
-        res.render('home', {
-            user: req.session.user,
-            currentPage: 'home',
-            totalStock: stats.totalStock || 0,
-            lowStock: stats.lowStock || 0,
-            pendingOrders: stats.pendingOrders || 0,
-            overStock: stats.overStock || 0
+        // ดึงประวัติการเข้าสู่ระบบ 5 รายการล่าสุด
+        const sqlLogs = `SELECT * FROM LoginLog ORDER BY login_time DESC LIMIT 5`;
+
+        db.all(sqlLogs, [], (err, logs) => {
+            if (err) {
+                console.error("Error fetching login logs:", err.message);
+                return res.status(500).send("Database Error");
+            }
+
+            // ส่งตัวแปรทั้งหมดไปให้ home.ejs
+            res.render('home', {
+                user: req.session.user,
+                currentPage: 'home',
+                totalStock: stats.totalStock || 0,
+                lowStock: stats.lowStock || 0,
+                pendingOrders: stats.pendingOrders || 0,
+                overStock: stats.overStock || 0,
+                loginLogs: logs // ตัวแปรสำหรับแสดงในตาราง LoginLog
+            });
         });
     });
 });
 
 app.get('/history', (req, res) => {
     if (!req.session.user) return res.redirect('/');
-    
-    res.render('history', { 
+
+    res.render('history', {
         user: req.session.user,
-        currentPage: 'history' 
+        currentPage: 'history'
     });
 });
 
@@ -204,7 +239,7 @@ app.post('/inventory/add', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
     const { name, details, brand, category, sku, zone, quantity, image } = req.body;
-    
+
     // ตั้งค่ารูปภาพ Default ในกรณีที่ไม่ได้ใส่ลิงก์มา
     const defaultImage = 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop';
     const finalImage = image ? image : defaultImage;
@@ -227,7 +262,7 @@ app.post('/inventory/edit/:id', (req, res) => {
 
     const productId = req.params.id;
     const { name, details, brand, category, zone, quantity, image } = req.body;
-    
+
     // ตั้งค่ารูปภาพ Default ในกรณีที่ลบลิงก์ออกจนว่างเปล่า
     const defaultImage = 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop';
     const finalImage = image ? image : defaultImage;
@@ -265,7 +300,7 @@ app.post('/inventory/delete/:id', (req, res) => {
             console.error('Error deleting product:', err.message);
             return res.status(500).send("Error deleting product.");
         }
-        res.redirect('/inventory'); 
+        res.redirect('/inventory');
     });
 });
 
