@@ -250,6 +250,10 @@ app.post('/inventory/edit/:id', (req, res) => {
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
+    if (req.session.user.role === 'staff') {
+        return res.redirect('/inventory');
+    }
+
     const productId = req.params.id;
 
     // คำสั่ง SQL ลบข้อมูลออกจากตาราง Inventory
