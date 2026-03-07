@@ -12,18 +12,14 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/navbar.css">
     <style>
-        /* สไตล์เพิ่มเติมสำหรับ Modal */
+        /* สไตล์บังคับ Modal ไม่ให้ล่องหน */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6);
             z-index: 9999;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; align-items: center;
             backdrop-filter: blur(2px);
         }
 
@@ -34,25 +30,16 @@
             width: 100%;
             max-width: 500px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            /* บังคับให้โชว์ 100% เผื่อ style.css ซ่อนไว้ */
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: scale(1) !important;
+            display: block !important;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .modal-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .modal-input {
-            width: 100%;
-            margin-top: 5px;
-        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .modal-label { font-size: 13px; font-weight: 500; color: #333; }
+        .modal-input { width: 100%; margin-top: 5px; }
     </style>
 </head>
 
@@ -61,18 +48,14 @@
     <%- include('includes/navbar') %>
 
         <main class="main-content">
-
             <div class="page-header">
                 <div>
-                    <p
-                        style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--primary); font-weight: 700; margin-bottom: 5px;">
-                        ระบบโลจิสติกส์คลังสินค้า</p>
+                    <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: var(--primary); font-weight: 700; margin-bottom: 5px;">ระบบโลจิสติกส์คลังสินค้า</p>
                     <h2>รายการสินค้าคงคลัง</h2>
-                    <p>จัดการสินทรัพย์ในคลังสินค้าแบบรวมศูนย์ ตรวจสอบระดับสต็อกแบบเรียลไทม์ และติดตามหมายเลขซีเรียล
-                        (SKU)</p>
+                    <p>จัดการสินทรัพย์ในคลังสินค้าแบบรวมศูนย์ ตรวจสอบระดับสต็อกแบบเรียลไทม์ และติดตามหมายเลขซีเรียล (SKU)</p>
                 </div>
                 <div class="btn-group">
-                    <button class="btn-primary" onclick="document.getElementById('addModal').style.display='flex'">
+                    <button class="btn-primary" onclick="openModal('addModal')">
                         <span class="material-symbols-outlined">add_circle</span> เพิ่มสินค้า
                     </button>
                 </div>
@@ -83,8 +66,7 @@
                     <label>ค้นหาสินค้า</label>
                     <div class="input-wrapper">
                         <span class="material-symbols-outlined icon">search</span>
-                        <input type="text" id="searchInput" class="form-control"
-                            placeholder="ค้นหาด้วยชื่อ หรือ SKU...">
+                        <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาด้วยชื่อ หรือ SKU...">
                     </div>
                 </div>
 
@@ -125,204 +107,93 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% if (products && products.length> 0) { %>
-                            <% products.forEach(product=> { %>
-                                <% let qtyColor='white' ; let badgeClass='success' ; let statusText='มีสินค้า' ; let
-                                    filterStatus='instock' ; if (product.quantity==0) { qtyColor='var(--danger)' ;
-                                    badgeClass='danger' ; statusText='สินค้าหมด' ; filterStatus='outstock' ; } else if
-                                    (product.quantity <=5) { qtyColor='var(--warning)' ; badgeClass='warning' ;
-                                    statusText='สินค้าใกล้หมด' ; filterStatus='lowstock' ; } let dotColor='cyan' ; if
-                                    (product.category==='Acoustic' ) dotColor='orange' ; else if
-                                    (product.category==='Accessory' ) dotColor='purple' ; %>
-
-                                    <tr class="product-row"
-                                        data-search="<%= product.name.toLowerCase() %> <%= product.sku.toLowerCase() %>"
-                                        data-brand="<%= product.brand %>" data-status="<%= filterStatus %>">
-                                        <td>
-                                            <div class="product-cell">
-                                                <div class="icon-box"
-                                                    style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-                                                    <img src="<%= product.image || 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop' %>"
-                                                        onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop';"
-                                                        alt="<%= product.name %>"
-                                                        style="width: 100%; height: 100%; object-fit: cover;">
-                                                </div>
-                                                <div class="product-info">
-                                                    <h4>
-                                                        <%= product.name %>
-                                                    </h4>
-                                                    <p>
-                                                        <%= product.details %>
-                                                    </p>
-                                                </div>
+                        <% if (products && products.length > 0) { %>
+                            <% products.forEach(product => { %>
+                                <% 
+                                    let qtyColor = 'white'; let badgeClass = 'success'; let statusText = 'มีสินค้า'; let filterStatus = 'instock';
+                                    if (product.quantity == 0) { qtyColor = 'var(--danger)'; badgeClass = 'danger'; statusText = 'สินค้าหมด'; filterStatus = 'outstock'; } 
+                                    else if (product.quantity <= 5) { qtyColor = 'var(--warning)'; badgeClass = 'warning'; statusText = 'สินค้าใกล้หมด'; filterStatus = 'lowstock'; }
+                                    let dotColor = 'cyan'; if (product.category === 'Acoustic') dotColor = 'orange'; else if (product.category === 'Accessory') dotColor = 'purple';
+                                %>
+                                <tr class="product-row" data-search="<%= product.name.toLowerCase() %> <%= product.sku.toLowerCase() %>" data-brand="<%= product.brand %>" data-status="<%= filterStatus %>">
+                                    <td>
+                                        <div class="product-cell">
+                                            <div class="icon-box" style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                                                <img src="<%= product.image || 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop' %>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop';" alt="<%= product.name %>" style="width: 100%; height: 100%; object-fit: cover;">
                                             </div>
-                                        </td>
-                                        <td>
                                             <div class="product-info">
-                                                <h4>
-                                                    <%= product.brand %>
-                                                </h4>
-                                                <span class="badge info">
-                                                    <%= product.category %>
-                                                </span>
+                                                <h4><%= product.name %></h4>
+                                                <p><%= product.details %></p>
                                             </div>
-                                        </td>
-                                        <td><span class="tag-mono">SKU: <%= product.sku %></span></td>
-                                        <td>
-                                            <div class="zone-indicator">
-                                                <div class="zone-dot <%= dotColor %>"></div>
-                                                <%= product.zone %>
-                                            </div>
-                                        </td>
-                                        <td
-                                            style="text-align: center; font-weight: bold; font-size: 16px; color: <%= qtyColor %>;">
-                                            <%= product.quantity %>
-                                        </td>
-                                        <td><span class="badge <%= badgeClass %>">
-                                                <%= statusText %>
-                                            </span></td>
-
-                                        <td style="text-align: right;">
-                                            <div
-                                                style="display: flex; gap: 5px; justify-content: flex-end; align-items: center;">
-                                                <button class="btn-icon edit" title="แก้ไข"
-                                                    onclick="openEditProductModal(this)" data-id="<%= product.id %>"
-                                                    data-name="<%= product.name %>" data-sku="<%= product.sku %>"
-                                                    data-brand="<%= product.brand %>"
-                                                    data-category="<%= product.category %>"
-                                                    data-zone="<%= product.zone %>"
-                                                    data-quantity="<%= product.quantity %>"
-                                                    data-details="<%= product.details %>"
-                                                    data-image="<%= product.image %>">
-                                                    <span class="material-symbols-outlined">edit_square</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="product-info">
+                                            <h4><%= product.brand %></h4>
+                                            <span class="badge info"><%= product.category %></span>
+                                        </div>
+                                    </td>
+                                    <td><span class="tag-mono">SKU: <%= product.sku %></span></td>
+                                    <td>
+                                        <div class="zone-indicator">
+                                            <div class="zone-dot <%= dotColor %>"></div>
+                                            <%= product.zone %>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: bold; font-size: 16px; color: <%= qtyColor %>;"><%= product.quantity %></td>
+                                    <td><span class="badge <%= badgeClass %>"><%= statusText %></span></td>
+                                    <td style="text-align: right;">
+                                        <div style="display: flex; gap: 5px; justify-content: flex-end; align-items: center;">
+                                            <button class="btn-icon edit" title="แก้ไข" onclick="openEditProductModal(this)" data-id="<%= product.id %>" data-name="<%= product.name %>" data-sku="<%= product.sku %>" data-brand="<%= product.brand %>" data-category="<%= product.category %>" data-zone="<%= product.zone %>" data-quantity="<%= product.quantity %>" data-details="<%= product.details %>" data-image="<%= product.image %>">
+                                                <span class="material-symbols-outlined">edit_square</span>
+                                            </button>
+                                            <button type="button" class="btn-icon" title="ประวัติการเคลื่อนไหว" onclick="openHistoryModal('<%= product.id %>', '<%= product.name %>')">
+                                                <span class="material-symbols-outlined">history</span>
+                                            </button>
+                                            <% if (user && user.role !== 'staff') { %>
+                                                <button type="button" class="btn-icon" title="ลบสินค้า" style="color: var(--danger);" onclick="openDeleteModal('<%= product.id %>', '<%= product.name %>')">
+                                                    <span class="material-symbols-outlined">delete</span>
                                                 </button>
-
-                                                <button class="btn-icon" title="ประวัติการเคลื่อนไหว"><span
-                                                        class="material-symbols-outlined">history</span></button>
-
-                                                <% if (user && user.role !=='staff' ) { %>
-                                                    <form action="/inventory/delete/<%= product.id %>" method="POST"
-                                                        onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?');"
-                                                        style="margin: 0; display: inline-block;">
-                                                        <button type="submit" class="btn-icon" title="ลบสินค้า"
-                                                            style="color: var(--danger);">
-                                                            <span class="material-symbols-outlined">delete</span>
-                                                        </button>
-                                                    </form>
-                                                    <% } %>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
-                                        <% } else { %>
-                                            <tr>
-                                                <td colspan="7"
-                                                    style="text-align: center; color: var(--text-muted); padding: 40px;">
-                                                    <span class="material-symbols-outlined"
-                                                        style="font-size: 48px; opacity: 0.5; margin-bottom: 10px;">inventory_2</span>
-                                                    <p>ไม่พบสินค้าในคลัง</p>
-                                                </td>
-                                            </tr>
                                             <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;"><p>ไม่พบสินค้าในคลัง</p></td></tr>
+                        <% } %>
                     </tbody>
                 </table>
-
                 <div class="pagination-wrapper">
-                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong id="visibleCount">
-                            <%= products ? products.length : 0 %>
-                        </strong> </div>
-
+                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong id="visibleCount"><%= products ? products.length : 0 %></strong> </div>
                 </div>
             </div>
-
-            <footer class="dash-footer">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <strong style="color: var(--primary);">GWMS</strong>
-                    <span>v2.4.1 (Stable)</span>
-                </div>
-                <div style="text-transform: uppercase; letter-spacing: 1px;">
-                    © 2026 Guitar Warehouse Systems. การเชื่อมต่อที่ปลอดภัย
-                </div>
-                <div class="links">
-                    <a href="#">นโยบายความเป็นส่วนตัว</a>
-                    <a href="#">ข้อกำหนด</a>
-                    <a href="#">ศูนย์ช่วยเหลือ</a>
-                </div>
-            </footer>
-
         </main>
 
         <div id="addModal" class="modal-overlay">
             <div class="modal-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3 style="margin: 0; color: #111;">เพิ่มสินค้าใหม่</h3>
-                    <button onclick="document.getElementById('addModal').style.display='none'"
-                        style="background: none; border: none; cursor: pointer; color: #888;">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
+                    <button type="button" onclick="closeModal('addModal')" style="background: none; border: none; cursor: pointer; color: #888;"><span class="material-symbols-outlined">close</span></button>
                 </div>
-
                 <form action="/inventory/add" method="POST" style="display: flex; flex-direction: column;">
                     <div class="form-grid">
-                        <div>
-                            <label class="modal-label">ชื่อสินค้า</label>
-                            <input type="text" name="name" required class="form-control modal-input"
-                                placeholder="เช่น Stratocaster">
-                        </div>
-                        <div>
-                            <label class="modal-label">รหัสสินค้า (SKU)</label>
-                            <input type="text" name="sku" required class="form-control modal-input"
-                                placeholder="เช่น FND-001">
-                        </div>
+                        <div><label class="modal-label">ชื่อสินค้า</label><input type="text" name="name" required class="form-control modal-input" placeholder="เช่น Stratocaster"></div>
+                        <div><label class="modal-label">รหัสสินค้า (SKU)</label><input type="text" name="sku" required class="form-control modal-input" placeholder="เช่น FND-001"></div>
                     </div>
-
                     <div class="form-grid">
-                        <div>
-                            <label class="modal-label">แบรนด์</label>
-                            <input type="text" name="brand" required class="form-control modal-input"
-                                placeholder="เช่น Fender">
-                        </div>
-                        <div>
-                            <label class="modal-label">หมวดหมู่</label>
-                            <select name="category" required class="form-control modal-input">
-                                <option value="Electric">กีตาร์ไฟฟ้า (Electric)</option>
-                                <option value="Acoustic">กีตาร์โปร่ง (Acoustic)</option>
-                                <option value="Accessory">อุปกรณ์เสริม (Accessory)</option>
-                            </select>
-                        </div>
+                        <div><label class="modal-label">แบรนด์</label><input type="text" name="brand" required class="form-control modal-input"></div>
+                        <div><label class="modal-label">หมวดหมู่</label><select name="category" required class="form-control modal-input"><option value="Electric">Electric</option><option value="Acoustic">Acoustic</option><option value="Accessory">Accessory</option></select></div>
                     </div>
-
                     <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
-                        <div>
-                            <label class="modal-label">โซน/ตำแหน่งจัดเก็บ</label>
-                            <input type="text" name="zone" required class="form-control modal-input"
-                                placeholder="เช่น Zone A / Rack 01">
-                        </div>
-                        <div>
-                            <label class="modal-label">จำนวนสต็อก</label>
-                            <input type="number" name="quantity" required min="0" value="0"
-                                class="form-control modal-input">
-                        </div>
+                        <div><label class="modal-label">โซน/ตำแหน่ง</label><input type="text" name="zone" required class="form-control modal-input"></div>
+                        <div><label class="modal-label">จำนวนสต็อก</label><input type="number" name="quantity" required min="0" value="0" class="form-control modal-input"></div>
                     </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <label class="modal-label">รายละเอียดเพิ่มเติม / สี</label>
-                        <input type="text" name="details" class="form-control modal-input"
-                            placeholder="เช่น สี 3-Color Sunburst">
-                    </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <label class="modal-label">ลิงก์รูปภาพสินค้า (URL)</label>
-                        <input type="text" name="image" class="form-control modal-input"
-                            placeholder="เช่น https://example.com/guitar.jpg">
-                    </div>
-
+                    <div style="margin-bottom: 20px;"><label class="modal-label">รายละเอียด</label><input type="text" name="details" class="form-control modal-input"></div>
+                    <div style="margin-bottom: 20px;"><label class="modal-label">ลิงก์รูปภาพ (URL)</label><input type="text" name="image" class="form-control modal-input"></div>
                     <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn-primary"
-                            style="flex: 1; display: flex; justify-content: center;">บันทึกสินค้า</button>
-                        <button type="button" class="btn-outline"
-                            onclick="document.getElementById('addModal').style.display='none'"
-                            style="flex: 1; display: flex; justify-content: center;">ยกเลิก</button>
+                        <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">บันทึกสินค้า</button>
+                        <button type="button" class="btn-outline" onclick="closeModal('addModal')" style="flex: 1; justify-content: center;">ยกเลิก</button>
                     </div>
                 </form>
             </div>
@@ -332,79 +203,90 @@
             <div class="modal-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3 style="margin: 0; color: #111;">แก้ไขข้อมูลสินค้า</h3>
-                    <button onclick="document.getElementById('editModal').style.display='none'"
-                        style="background: none; border: none; cursor: pointer; color: #888;">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
+                    <button type="button" onclick="closeModal('editModal')" style="background: none; border: none; cursor: pointer; color: #888;"><span class="material-symbols-outlined">close</span></button>
                 </div>
-
                 <form id="editProductForm" method="POST" style="display: flex; flex-direction: column;">
                     <div class="form-grid">
-                        <div>
-                            <label class="modal-label">ชื่อสินค้า</label>
-                            <input type="text" id="editName" name="name" required class="form-control modal-input">
-                        </div>
-                        <div>
-                            <label class="modal-label">รหัสสินค้า (SKU)</label>
-                            <input type="text" id="editSku" name="sku" required class="form-control modal-input"
-                                readonly style="background: rgba(0,0,0,0.05); cursor: not-allowed;"
-                                title="ไม่สามารถแก้ SKU ได้">
-                        </div>
+                        <div><label class="modal-label">ชื่อสินค้า</label><input type="text" id="editName" name="name" required class="form-control modal-input"></div>
+                        <div><label class="modal-label">รหัสสินค้า (SKU)</label><input type="text" id="editSku" name="sku" required class="form-control modal-input" readonly style="background: rgba(0,0,0,0.05); cursor: not-allowed;"></div>
                     </div>
-
                     <div class="form-grid">
-                        <div>
-                            <label class="modal-label">แบรนด์</label>
-                            <input type="text" id="editBrand" name="brand" required class="form-control modal-input">
-                        </div>
-                        <div>
-                            <label class="modal-label">หมวดหมู่</label>
-                            <select id="editCategory" name="category" required class="form-control modal-input">
-                                <option value="Electric">กีตาร์ไฟฟ้า (Electric)</option>
-                                <option value="Acoustic">กีตาร์โปร่ง (Acoustic)</option>
-                                <option value="Accessory">อุปกรณ์เสริม (Accessory)</option>
-                            </select>
-                        </div>
+                        <div><label class="modal-label">แบรนด์</label><input type="text" id="editBrand" name="brand" required class="form-control modal-input"></div>
+                        <div><label class="modal-label">หมวดหมู่</label><select id="editCategory" name="category" required class="form-control modal-input"><option value="Electric">Electric</option><option value="Acoustic">Acoustic</option><option value="Accessory">Accessory</option></select></div>
                     </div>
-
                     <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
-                        <div>
-                            <label class="modal-label">โซน/ตำแหน่งจัดเก็บ</label>
-                            <input type="text" id="editZone" name="zone" required class="form-control modal-input">
-                        </div>
-                        <div>
-                            <label class="modal-label">จำนวนสต็อก</label>
-                            <input type="number" id="editQuantity" name="quantity" required min="0"
-                                class="form-control modal-input">
-                        </div>
+                        <div><label class="modal-label">โซน/ตำแหน่ง</label><input type="text" id="editZone" name="zone" required class="form-control modal-input"></div>
+                        <div><label class="modal-label">จำนวนสต็อก</label><input type="number" id="editQuantity" name="quantity" required min="0" class="form-control modal-input"></div>
                     </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <label class="modal-label">รายละเอียดเพิ่มเติม / สี</label>
-                        <input type="text" id="editDetails" name="details" class="form-control modal-input">
-                    </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <label class="modal-label">ลิงก์รูปภาพสินค้า (URL)</label>
-                        <input type="text" id="editImage" name="image" class="form-control modal-input">
-                    </div>
-
+                    <div style="margin-bottom: 20px;"><label class="modal-label">รายละเอียด</label><input type="text" id="editDetails" name="details" class="form-control modal-input"></div>
+                    <div style="margin-bottom: 20px;"><label class="modal-label">ลิงก์รูปภาพ (URL)</label><input type="text" id="editImage" name="image" class="form-control modal-input"></div>
                     <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn-primary"
-                            style="flex: 1; display: flex; justify-content: center;">อัปเดตสินค้า</button>
-                        <button type="button" class="btn-outline"
-                            onclick="document.getElementById('editModal').style.display='none'"
-                            style="flex: 1; display: flex; justify-content: center;">ยกเลิก</button>
+                        <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">อัปเดตสินค้า</button>
+                        <button type="button" class="btn-outline" onclick="closeModal('editModal')" style="flex: 1; justify-content: center;">ยกเลิก</button>
                     </div>
                 </form>
             </div>
         </div>
 
+        <div id="historyModal" class="modal-overlay">
+            <div class="modal-box" style="max-width: 600px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: #111;">ประวัติการทำรายการ: <br><span id="historyItemName" style="color: var(--primary); font-size: 16px;"></span></h3>
+                    <button type="button" onclick="closeModal('historyModal')" style="background: none; border: none; cursor: pointer; color: #888;"><span class="material-symbols-outlined">close</span></button>
+                </div>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); box-shadow: none;">
+                    <table class="custom-table" style="font-size: 13px;">
+                        <thead><tr><th>วันที่-เวลา</th><th>ผู้ทำรายการ</th><th>สถานะ</th><th style="text-align: center;">จำนวน</th><th>หมายเหตุ</th></tr></thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="deleteConfirmModal" class="modal-overlay" style="z-index: 100000;">
+            <div class="modal-box" style="max-width: 400px; text-align: center; padding: 40px 30px;">
+                <div style="background: #ffebee; color: #dc3545; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px;">warning</span>
+                </div>
+                <h3 style="color: #111; margin-bottom: 10px;">ยืนยันการลบสินค้า</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 30px;">
+                    คุณแน่ใจหรือไม่ว่าต้องการลบ <strong id="deleteItemName" style="color: #111;"></strong> ?<br>
+                    <span style="color: #dc3545; font-size: 12px; margin-top: 5px; display: inline-block;">การลบนี้ไม่สามารถกู้คืนได้</span>
+                </p>
+                <form id="deleteProductForm" method="POST" style="display: flex; gap: 10px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('deleteConfirmModal')" style="flex: 1; display: flex; justify-content: center;">ยกเลิก</button>
+                    <button type="submit" class="btn-primary" style="flex: 1; display: flex; justify-content: center; background: #dc3545; border-color: #dc3545;">ลบสินค้าถาวร</button>
+                </form>
+            </div>
+        </div>
+
         <script>
-            // ฟังก์ชัน Modal Edit
+            // ฟังก์ชันเสริมพลัง ช่วยกระตุ้นให้กล่องเด้งแน่นอน
+            function openModal(modalId) {
+                const modal = document.getElementById(modalId);
+                modal.style.display = 'flex';
+                modal.classList.add('active'); // เผื่อ style.css ของคุณต้องการ class นี้
+            }
+            function closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                modal.style.display = 'none';
+                modal.classList.remove('active');
+            }
+
+            window.onclick = function (event) {
+                if (event.target.classList.contains('modal-overlay')) {
+                    closeModal(event.target.id);
+                }
+            }
+
+            function openDeleteModal(id, name) {
+                document.getElementById('deleteItemName').textContent = name;
+                document.getElementById('deleteProductForm').action = '/inventory/delete/' + id;
+                openModal('deleteConfirmModal');
+            }
+
             function openEditProductModal(btn) {
-                const id = btn.getAttribute('data-id');
-                document.getElementById('editProductForm').action = '/inventory/edit/' + id;
+                document.getElementById('editProductForm').action = '/inventory/edit/' + btn.getAttribute('data-id');
                 document.getElementById('editName').value = btn.getAttribute('data-name');
                 document.getElementById('editSku').value = btn.getAttribute('data-sku');
                 document.getElementById('editBrand').value = btn.getAttribute('data-brand');
@@ -413,16 +295,43 @@
                 document.getElementById('editQuantity').value = btn.getAttribute('data-quantity');
                 document.getElementById('editDetails').value = btn.getAttribute('data-details');
                 document.getElementById('editImage').value = btn.getAttribute('data-image');
-                document.getElementById('editModal').style.display = 'flex';
+                openModal('editModal');
             }
 
-            window.onclick = function (event) {
-                if (event.target.classList.contains('modal-overlay')) {
-                    event.target.style.display = 'none';
+            async function openHistoryModal(id, name) {
+                document.getElementById('historyItemName').textContent = name;
+                openModal('historyModal');
+                const tbody = document.getElementById('historyTableBody');
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">กำลังโหลดข้อมูล...</td></tr>';
+                try {
+                    const response = await fetch(`/api/inventory/history/${id}`);
+                    const data = await response.json();
+                    if (data.length > 0) {
+                        let html = '';
+                        data.forEach(log => {
+                            let badgeClass = 'info';
+                            if(log.status === 'Completed') badgeClass = 'success';
+                            else if(log.status === 'Pending') badgeClass = 'warning';
+                            else if(log.status === 'Cancelled') badgeClass = 'danger';
+                            html += `<tr style="background: white;">
+                                <td style="color: #666;">${log.timestamp}</td>
+                                <td style="font-weight: 500; color: #111;">${log.user_name}</td>
+                                <td><span class="badge ${badgeClass}">${log.status}</span></td>
+                                <td style="text-align: center; font-weight: bold; color: var(--primary);">${log.order_quantity}</td>
+                                <td style="color: #666;">${log.detail || '-'}</td>
+                            </tr>`;
+                        });
+                        tbody.innerHTML = html;
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px; color: #666;">ยังไม่มีประวัติการทำรายการสำหรับสินค้านี้</td></tr>';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: red;">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
                 }
             }
 
-            // ระบบ Filter สินค้าแบบ Real-time
+            // ระบบ Filter
             document.addEventListener('DOMContentLoaded', () => {
                 const searchInput = document.getElementById('searchInput');
                 const brandFilter = document.getElementById('brandFilter');
@@ -434,37 +343,21 @@
                     const searchTerm = searchInput.value.toLowerCase();
                     const selectedBrand = brandFilter.value;
                     const selectedStatus = statusFilter.value;
-
                     let visibleCount = 0;
-
                     productRows.forEach(row => {
                         const rowSearchText = row.getAttribute('data-search');
                         const rowBrand = row.getAttribute('data-brand');
                         const rowStatus = row.getAttribute('data-status');
-
-                        const matchesSearch = rowSearchText.includes(searchTerm);
-                        const matchesBrand = selectedBrand === "" || rowBrand === selectedBrand;
-                        const matchesStatus = selectedStatus === "" || rowStatus === selectedStatus;
-
-                        if (matchesSearch && matchesBrand && matchesStatus) {
-                            row.style.display = '';
-                            visibleCount++;
-                        } else {
-                            row.style.display = 'none';
-                        }
+                        if (rowSearchText.includes(searchTerm) && (selectedBrand === "" || rowBrand === selectedBrand) && (selectedStatus === "" || rowStatus === selectedStatus)) {
+                            row.style.display = ''; visibleCount++;
+                        } else { row.style.display = 'none'; }
                     });
-
-                    if (visibleCountDisplay) {
-                        visibleCountDisplay.textContent = visibleCount;
-                    }
+                    if (visibleCountDisplay) visibleCountDisplay.textContent = visibleCount;
                 }
-
-                searchInput.addEventListener('input', filterTable);
-                brandFilter.addEventListener('change', filterTable);
-                statusFilter.addEventListener('change', filterTable);
+                if(searchInput) searchInput.addEventListener('input', filterTable);
+                if(brandFilter) brandFilter.addEventListener('change', filterTable);
+                if(statusFilter) statusFilter.addEventListener('change', filterTable);
             });
         </script>
-
 </body>
-
 </html>

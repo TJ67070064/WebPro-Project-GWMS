@@ -250,6 +250,7 @@ app.post('/inventory/edit/:id', (req, res) => {
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
+    // ป้องกัน Staff ลบสินค้า
     if (req.session.user.role === 'staff') {
         return res.redirect('/inventory');
     }
@@ -351,7 +352,9 @@ app.get('/orders', (req, res) => {
     })
 });
 
-//API ==============================
+// ==========================================
+// API Routes
+// ==========================================
 app.get('/api/product/:id', (req, res) => {
     const productId = req.params.id;
     // แก้ไขจาก Products เป็น Inventory ให้ตรงกับชื่อตารางปัจจุบัน
@@ -363,6 +366,34 @@ app.get('/api/product/:id', (req, res) => {
         }
         console.log("Send data from /api/product/:id back with ", row);
         res.json(row);
+    });
+});
+
+// API: ดึงประวัติการเคลื่อนไหวของสินค้าแต่ละชิ้น
+app.get('/api/inventory/history/:id', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Unauthorized" });
+
+    const itemId = req.params.id;
+    const sql = `
+        SELECT 
+            Orders.order_id, 
+            Orders.order_quantity, 
+            Orders.status, 
+            Orders.detail, 
+            Orders.timestamp,
+            Users.name AS user_name
+        FROM Orders
+        JOIN Users ON Orders.user_id = Users.id
+        WHERE Orders.item_id = ?
+        ORDER BY Orders.timestamp DESC
+    `;
+
+    db.all(sql, [itemId], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: "Database Error" });
+        }
+        res.json(rows);
     });
 });
 
