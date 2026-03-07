@@ -281,6 +281,7 @@
 
             function openDeleteModal(id, name) {
                 document.getElementById('deleteItemName').textContent = name;
+                //เพิ่ม action ตรงนี้
                 document.getElementById('deleteProductForm').action = '/inventory/delete/' + id;
                 openModal('deleteConfirmModal');
             }

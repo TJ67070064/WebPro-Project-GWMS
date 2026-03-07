@@ -276,8 +276,8 @@ app.post('/inventory/edit/:id', (req, res) => {
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
     
-    const { name, details, brand, category, zone, quantity, image } = req.body;
-    console.log("name",name);
+    // const { name, details, brand, category, zone, quantity, image } = req.body;
+
     // ป้องกัน Staff ลบสินค้า
     if (req.session.user.role === 'staff') {
         return res.redirect('/inventory');
@@ -285,19 +285,26 @@ app.post('/inventory/delete/:id', (req, res) => {
 
     const productId = req.params.id;
 
-    // คำสั่ง SQL ลบข้อมูลออกจากตาราง Inventory
-    const sql = `DELETE FROM Inventory WHERE id = ?`;
-
-    db.run(sql, productId, function (err) {
+    const selectId = `SELECT name FROM Inventory WHERE id = ?;`;
+    db.get(selectId, [productId], (err, row) => {
         if (err) {
-            console.error('Error deleting product:', err.message);
-            return res.status(500).send("Error deleting product.");
+            console.error("Error fetching product:", err.message);
+            return res.status(500).send("Database error");
         }
 
-        //keep log
-        logActivity(req.session.user.name, "DELETE_PRODUCT", name);
-        res.redirect('/inventory'); 
-    });
+        const productName = row.name;
+        const deleteProduct = `DELETE FROM Inventory WHERE id = ?`;
+        db.run(deleteProduct, productId, (err) => {
+            if (err) {
+                console.error('Error deleting product:', err.message);
+                return res.status(500).send("Error deleting product.");
+            }
+
+            //Keep Log by calling logActivity() function
+            logActivity(req.session.user.name, "DELETE_PRODUCT", productName);
+            res.redirect('/inventory');
+            });
+        });
 });
 
 // ==========================================
