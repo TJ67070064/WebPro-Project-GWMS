@@ -127,7 +127,7 @@
                                     let qtyColor = 'white';
                                     let badgeClass = 'success';
                                     let statusText = 'มีสินค้า';
-                                    let filterStatus = 'instock'; // สร้างตัวแปรสำหรับ filter
+                                    let filterStatus = 'instock';
 
                                     if (product.quantity == 0) {
                                         qtyColor = 'var(--danger)';
@@ -181,23 +181,31 @@
                                         <%= product.quantity %>
                                     </td>
                                     <td><span class="badge <%= badgeClass %>"><%= statusText %></span></td>
+                                    
                                     <td style="text-align: right;">
-                                        
-                                        <button class="btn-icon edit" title="แก้ไข" 
-                                            onclick="openEditProductModal(this)" 
-                                            data-id="<%= product.id %>"
-                                            data-name="<%= product.name %>" 
-                                            data-sku="<%= product.sku %>" 
-                                            data-brand="<%= product.brand %>"
-                                            data-category="<%= product.category %>" 
-                                            data-zone="<%= product.zone %>" 
-                                            data-quantity="<%= product.quantity %>"
-                                            data-details="<%= product.details %>" 
-                                            data-image="<%= product.image %>">
-                                            <span class="material-symbols-outlined">edit_square</span>
-                                        </button>
-                                        
-                                        <button class="btn-icon" title="ประวัติการเคลื่อนไหว"><span class="material-symbols-outlined">history</span></button>
+                                        <div style="display: flex; gap: 5px; justify-content: flex-end; align-items: center;">
+                                            <button class="btn-icon edit" title="แก้ไข" 
+                                                onclick="openEditProductModal(this)" 
+                                                data-id="<%= product.id %>"
+                                                data-name="<%= product.name %>" 
+                                                data-sku="<%= product.sku %>" 
+                                                data-brand="<%= product.brand %>"
+                                                data-category="<%= product.category %>" 
+                                                data-zone="<%= product.zone %>" 
+                                                data-quantity="<%= product.quantity %>"
+                                                data-details="<%= product.details %>" 
+                                                data-image="<%= product.image %>">
+                                                <span class="material-symbols-outlined">edit_square</span>
+                                            </button>
+                                            
+                                            <button class="btn-icon" title="ประวัติการเคลื่อนไหว"><span class="material-symbols-outlined">history</span></button>
+
+                                            <form action="/inventory/delete/<%= product.id %>" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?');" style="margin: 0; display: inline-block;">
+                                                <button type="submit" class="btn-icon" title="ลบสินค้า" style="color: var(--danger);">
+                                                    <span class="material-symbols-outlined">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <% }) %>
@@ -213,7 +221,7 @@
                 </table>
 
                 <div class="pagination-wrapper">
-                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong id="visibleCount"><%= products ? products.length : 0 %></div>
+                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong id="visibleCount"><%= products ? products.length : 0 %></strong> </div>
                     
                 </div>
             </div>
@@ -224,7 +232,7 @@
                     <span>v2.4.1 (Stable)</span>
                 </div>
                 <div style="text-transform: uppercase; letter-spacing: 1px;">
-                    © 2026 Guitar Warehouse Systems.
+                    © 2026 Guitar Warehouse Systems. การเชื่อมต่อที่ปลอดภัย
                 </div>
                 <div class="links">
                     <a href="#">นโยบายความเป็นส่วนตัว</a>
@@ -387,9 +395,7 @@
                 }
             }
 
-            // ==========================================
             // ระบบ Filter สินค้าแบบ Real-time
-            // ==========================================
             document.addEventListener('DOMContentLoaded', () => {
                 const searchInput = document.getElementById('searchInput');
                 const brandFilter = document.getElementById('brandFilter');
@@ -409,12 +415,10 @@
                         const rowBrand = row.getAttribute('data-brand');
                         const rowStatus = row.getAttribute('data-status');
 
-                        // เช็คเงื่อนไข
                         const matchesSearch = rowSearchText.includes(searchTerm);
                         const matchesBrand = selectedBrand === "" || rowBrand === selectedBrand;
                         const matchesStatus = selectedStatus === "" || rowStatus === selectedStatus;
 
-                        // ถ้าตรงทุกเงื่อนไข ให้โชว์แถวนี้
                         if (matchesSearch && matchesBrand && matchesStatus) {
                             row.style.display = '';
                             visibleCount++;
@@ -423,13 +427,11 @@
                         }
                     });
 
-                    // อัปเดตตัวเลขจำนวนรายการที่แสดงผลอยู่
                     if(visibleCountDisplay) {
                         visibleCountDisplay.textContent = visibleCount;
                     }
                 }
 
-                // ดักจับ Event เมื่อมีการพิมพ์หรือเปลี่ยนตัวเลือก
                 searchInput.addEventListener('input', filterTable);
                 brandFilter.addEventListener('change', filterTable);
                 statusFilter.addEventListener('change', filterTable);
