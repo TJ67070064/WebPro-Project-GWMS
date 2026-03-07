@@ -182,9 +182,31 @@
                         <div><label class="modal-label">รหัสสินค้า (SKU)</label><input type="text" name="sku" required class="form-control modal-input" placeholder="เช่น FND-001"></div>
                     </div>
                     <div class="form-grid">
-                        <div><label class="modal-label">แบรนด์</label><input type="text" name="brand" required class="form-control modal-input"></div>
+                    <div>
+                        <label class="modal-label">แบรนด์</label>
+
+                        <select id="brandSelect" name="brand" class="form-control modal-input" onchange="toggleOtherBrand()">
+                            <option value="">เลือกแบรนด์</option>
+                            <option value="Fender">Fender</option>
+                            <option value="Gibson">Gibson</option>
+                            <option value="Ibanez">Ibanez</option>
+                            <option value="Martin">Martin</option>
+                            <option value="Ernie Ball">Ernie Ball</option>
+                            <option value="other">อื่นๆ</option>
+                        </select>
+
+                        <input
+                        type="text"
+                        id="otherBrandInput"
+                        class="form-control modal-input"
+                        placeholder="พิมพ์ชื่อแบรนด์"
+                        style="display:none; margin-top:8px;"
+                        >
+                    </div>
+
                         <div><label class="modal-label">หมวดหมู่</label><select name="category" required class="form-control modal-input"><option value="Electric">Electric</option><option value="Acoustic">Acoustic</option><option value="Accessory">Accessory</option></select></div>
                     </div>
+
                     <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
                         <div><label class="modal-label">โซน/ตำแหน่ง</label><input type="text" name="zone" required class="form-control modal-input"></div>
                         <div><label class="modal-label">จำนวนสต็อก</label><input type="number" name="quantity" required min="0" value="0" class="form-control modal-input"></div>
@@ -211,7 +233,16 @@
                         <div><label class="modal-label">รหัสสินค้า (SKU)</label><input type="text" id="editSku" name="sku" required class="form-control modal-input" readonly style="background: rgba(0,0,0,0.05); cursor: not-allowed;"></div>
                     </div>
                     <div class="form-grid">
-                        <div><label class="modal-label">แบรนด์</label><input type="text" id="editBrand" name="brand" required class="form-control modal-input"></div>
+                        <div>
+                            <label class="modal-label">แบรนด์</label>
+                                <select id="editBrand" name="brand" required class="form-control modal-input">
+                                    <option value="Fender">Fender</option>
+                                    <option value="Gibson">Gibson</option>
+                                    <option value="Ibanez">Ibanez</option>
+                                    <option value="Martin">Martin</option>
+                                    <option value="Ernie Ball">Ernie Ball</option>
+                                </select>
+                        </div>
                         <div><label class="modal-label">หมวดหมู่</label><select id="editCategory" name="category" required class="form-control modal-input"><option value="Electric">Electric</option><option value="Acoustic">Acoustic</option><option value="Accessory">Accessory</option></select></div>
                     </div>
                     <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
@@ -298,6 +329,27 @@
                 document.getElementById('editImage').value = btn.getAttribute('data-image');
                 openModal('editModal');
             }
+
+            function toggleOtherBrand(){
+
+                const select = document.getElementById("brandSelect");
+                const input = document.getElementById("otherBrandInput");
+
+                if(select.value === "other"){
+
+                    input.style.display = "block";
+                    input.name = "brand";      // ให้ input เป็นตัวส่งค่า
+                    select.name = "";          // select ไม่ต้องส่งค่า
+
+                }else{
+
+                    input.style.display = "none";
+                    input.name = "";
+                    select.name = "brand";     // select ส่งค่าแทน
+
+            }
+
+}
 
             async function openHistoryModal(id, name) {
                 document.getElementById('historyItemName').textContent = name;
