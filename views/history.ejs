@@ -63,47 +63,46 @@
 
         <!-- Table -->
         <table class="history-table">
-            <thead>
-                <tr>
-                    <th>TIMESTAMP</th>
-                    <th>ACTOR</th>
-                    <th>ACTION TYPE</th>
-                    <th>ITEM REFERENCE</th>
-                    <th>DETAILS</th>
-                    <th>STATUS</th>
-                </tr>
-            </thead>
-            <tbody>
+    <thead>
+        <tr>
+            <th>LOG_ID</th>
+            <th>ACTION TYPE</th>
+            <th>TIMESTAMP</th>
+            <th>USER</th>
+            <th>PRODUCT</th>
+        </tr>
+    </thead>
 
-                <tr>
-                    <td>Oct 24, 2023<br>14:32 PM</td>
-                    <td>John Doe</td>
-                    <td>Receive Stock</td>
-                    <td>Fender Stratocaster<br>SN: US2105489</td>
-                    <td>Added to inventory from Shipment #8922. Placed in Zone A-12.</td>
-                    <td class="status-green">Completed</td>
-                </tr>
+    <tbody>
 
-                <tr>
-                    <td>Oct 23, 2023<br>09:45 AM</td>
-                    <td>Mike King</td>
-                    <td>Dispatch</td>
-                    <td>Ibanez RG550<br>SN: F210332</td>
-                    <td>Order #4451 shipped to Customer via FedEx.</td>
-                    <td class="status-green">Shipped</td>
-                </tr>
+        <% logs.forEach(log => { %>
 
-                <tr>
-                    <td>Oct 23, 2023<br>08:20 AM</td>
-                    <td>John Doe</td>
-                    <td>QC Rejection</td>
-                    <td>PRS Custom 24<br>SN: 210987</td>
-                    <td>Failed inbound inspection. Neck warp detected.</td>
-                    <td class="status-red">Action Required</td>
-                </tr>
+        <tr>
+            <td><%= log.log_id %></td>
+            
+            <td>
+            <% if (log.activity_type === "ADD_PRODUCT") { %>
+                <span class="quick-pill pill-inbound">เพิ่ม</span>
 
-            </tbody>
-        </table>
+            <% } else if (log.activity_type === "DELETE_PRODUCT") { %>
+                <span class="quick-pill pill-outbound">ลบ</span>
+
+            <% } else if (log.activity_type === "EDIT_PRODUCT") { %>
+                <span class="quick-pill pill-edits">แก้ไข</span>
+
+            <% } else { %>
+                <span class="quick-pill pill-audits">ตรวจสอบ</span>
+            <% } %>
+            </td>
+
+            <td><%= log.timestamp %></td>
+            <td><%= log.user_name %></td>
+            <td><%= log.product_name || '-' %></td>
+        </tr>
+        <% }) %>
+
+    </tbody>
+</table>
 
 
         <!-- Pagination -->
