@@ -83,6 +83,17 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 FOREIGN KEY (user_id) REFERENCES Users(id)
             )`);
 
+            // --- สร้างตาราง ActivityLog ---
+            db.run(`CREATE TABLE IF NOT EXISTS ActivityLog (
+                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                timestamp TEXT DEFAULT (DATETIME('now','localtime')),
+                activity_type TEXT,
+                product_id INTEGER,
+                FOREIGN KEY (user_id) REFERENCES Users(id),
+                FOREIGN KEY (product_id) REFERENCES Inventory(id)
+            )`);
+
             const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
                                  SELECT ?, ?, ?, ?, ?
                                  WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 1)`;
@@ -92,6 +103,23 @@ const db = new sqlite3.Database('./database.db', (err) => {
         });
     }
 });
+// ==========================================
+// Activity Log Function
+// ==========================================
+
+function logActivity(userId, activity, productId) {
+
+    const sql = `
+    INSERT INTO ActivityLog (user_id, activity_type, product_id)
+    VALUES (?, ?, ?)
+    `;
+
+    db.run(sql, [userId, activity, productId], (err) => {
+        if (err) {
+            console.error("Log error:", err.message);
+        }
+    });
+}
 
 // ==========================================
 // 3. ระบบ Authentication (Login / Logout)
@@ -172,6 +200,7 @@ app.get('/home', (req, res) => {
     });
 });
 
+
 app.get('/history', (req, res) => {
     if (!req.session.user) return res.redirect('/');
     
@@ -199,6 +228,7 @@ app.get('/inventory', (req, res) => {
     });
 });
 
+//ADD
 // Route สำหรับรับข้อมูลเพิ่มสินค้าใหม่ (รองรับรูปภาพ)
 app.post('/inventory/add', (req, res) => {
     if (!req.session.user) return res.redirect('/');
@@ -217,11 +247,15 @@ app.post('/inventory/add', (req, res) => {
             console.error('Error adding product:', err.message);
             return res.status(500).send("Error adding product. SKU might already exist.");
         }
+
+        //keeplog
+        logActivity(req.session.user.id, "ADD_PRODUCT", this.lastID);
+
         res.redirect('/inventory');
     });
 });
 
-// Route สำหรับรับข้อมูลแก้ไขสินค้า (Edit Product)
+//EDIT
 app.post('/inventory/edit/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
@@ -242,6 +276,9 @@ app.post('/inventory/edit/:id', (req, res) => {
             console.error('Error updating product:', err.message);
             return res.status(500).send("Error updating product.");
         }
+
+        //keeplog
+        logActivity(req.session.user.id, "EDIT_PRODUCT", productId);
         res.redirect('/inventory'); // อัปเดตเสร็จให้กลับไปหน้าคลังสินค้า
     });
 });
