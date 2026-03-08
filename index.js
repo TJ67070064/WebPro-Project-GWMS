@@ -232,7 +232,7 @@ app.get('/home', (req, res) => {
         }
 
         // ดึงประวัติการเข้าสู่ระบบ 5 รายการล่าสุด
-        const sqlLogs = `SELECT * FROM LoginLog ORDER BY login_time DESC LIMIT 5`;
+        const sqlLogs = `SELECT * FROM LoginLog ORDER BY login_time DESC LIMIT 10`;
 
         db.all(sqlLogs, [], (err, logs) => {
             if (err) {
