@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GWMS Dashboard</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/dashboard.css">
@@ -16,7 +15,7 @@
 
 <body class="dashboard-layout">
 
-   <%- include('includes/navbar') %>
+    <%- include('includes/navbar') %>
 
     <main class="main-content">
         <div class="page-header">
@@ -24,7 +23,6 @@
                 <h2>สรุปภาพรวมแดชบอร์ด</h2>
                 <p>ยินดีต้อนรับ, <%= user.name.split(' ')[0] %>. วันนี้ที่โกดังมีอะไรเกิดขึ้นบ้าง มาดูกัน</p>
             </div>
-            
         </div>
 
         <div class="stats-grid">
@@ -73,62 +71,54 @@
 
         <div class="table-container">
             <div class="table-header">
-                <h3>รายการที่ใช้งานล่าสุด (ตัวอย่าง):</h3>
-                <a href="/history"
-                    style="color: var(--primary); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                    ดูประวัติทั้งหมด <span class="material-symbols-outlined"
-                        style="font-size: 18px;">arrow_forward</span>
-                </a>
+                <h3>ประวัติการเข้าสู่ระบบล่าสุด (Login Logs):</h3>
+                <!-- <a href="#" style="color: var(--primary); text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                    ดูประวัติทั้งหมด <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                </a> -->
             </div>
             <table class="custom-table">
                 <thead>
                     <tr>
                         <th>สถานะ</th>
-                        <th>เรื่อง</th>
-                        <th>พนักงาน</th>
-                        <th>เวลา</th>
-                        <th style="text-align: right;">รายละเอียด</th>
+                        <th>Username</th>
+                        <th>ผู้ใช้งาน</th>
+                        <th>IP Address</th>
+                        <th style="text-align: right;">เวลาเข้าสู่ระบบ</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><span class="badge success">Received</span></td>
-                        <td style="font-weight: 600;">Inbound #3024</td>
-                        <td>
-                            <div class="staff-cell">
-                                <div class="staff-avatar">M</div> Michael T.
-                            </div>
-                        </td>
-                        <td style="color: var(--text-muted);">Just now</td>
-                        <td style="text-align: right; color: var(--text-muted);">Fender Stratocaster (x5)</td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge info">Shipped</span></td>
-                        <td style="font-weight: 600;">Order #8821</td>
-                        <td>
-                            <div class="staff-cell">
-                                <div class="staff-avatar">S</div> Sarah J.
-                            </div>
-                        </td>
-                        <td style="color: var(--text-muted);">15 mins ago</td>
-                        <td style="text-align: right; color: var(--text-muted);">Gibson Les Paul Std</td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge warning">Audit</span></td>
-                        <td style="font-weight: 600;">Zone B Count</td>
-                        <td>
-                            <div class="staff-cell">
-                                <div class="staff-avatar">A</div> Alex G.
-                            </div>
-                        </td>
-                        <td style="color: var(--text-muted);">45 mins ago</td>
-                        <td style="text-align: right; color: var(--text-muted);">Discrepancy: -2 Units</td>
-                    </tr>
+                    <% if (typeof loginLogs !== 'undefined' && loginLogs.length > 0) { %>
+                        <% loginLogs.forEach(function(log) { %>
+                            <tr>
+                                <td>
+                                    <% if (log.status === 'Success') { %>
+                                        <span class="badge success">Success</span>
+                                    <% } else { %>
+                                        <span class="badge danger">Failed</span>
+                                    <% } %>
+                                </td>
+                                <td style="font-weight: 600;">@<%= log.username %></td>
+                                <td>
+                                    <div class="staff-cell">
+                                        <div class="staff-avatar"><%= log.display_name.charAt(0).toUpperCase() %></div> 
+                                        <%= log.display_name %>
+                                    </div>
+                                </td>
+                                <td style="color: var(--text-muted);"><%= log.ip_address %></td>
+                                <td style="text-align: right; color: var(--text-muted);"><%= log.login_time %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                                ไม่มีประวัติการเข้าสู่ระบบ
+                            </td>
+                        </tr>
+                    <% } %>
                 </tbody>
             </table>
         </div>
     </main>
 
 </body>
-
 </html>
