@@ -399,30 +399,33 @@ app.get('/orders/add-orders', (req, res) => {
 });
 
 app.post('/orders/add-orders/:id', (req, res) => {
-    const allProduct = `INSERT INTO Orders(item_id, user_id, status, detail, order_quantity)
+    const insertOrder = `INSERT INTO Orders(item_id, user_id, status, detail, order_quantity)
                         VALUES(?, ?, ?, ?, ?);`;
     const inventoryId = req.params.id; //ยังไม่ใช้ ค่อยรอแก้ตอนใช้แบบ foregin key
     const user_id = req.session.user.id;
     const role = req.session.user.role;
-    const { detail, quantity } = req.body;
+    const { detail, inputQuantity } = req.body;
     let status;
     if (role == "staff") {
         status = "รอการอนุมัติ";
     } else {
         status = "กำลังเตรียมสินค้า";
     }
-    db.all(allProduct, [inventoryId, user_id, status, detail, quantity], (err, rows) => {
+    db.run(insertOrder, [inventoryId, user_id, status, detail, inputQuantity], (err) => {
         if (err) {
             return res.status(500).send("Database Error" + err);
         }
         //INSERT เสร็จต้องไปลบรายการออกจาก Inventory ด้วย
-        const reduceInventory = ``;
-        db.run(reduceInventory, [], (err) => {
+        // const currentQuantity = inventory.quantity - quantity;
+        const reduceInventory = `UPDATE Inventory
+                                SET quantity = quantity - ?
+                                WHERE id = ?;`;
+        db.run(reduceInventory, [inputQuantity, inventoryId], (err) => {
             if (err) {
                 return console.error(err);
             }
+            res.redirect('/orders');
         });
-        res.redirect('/orders');
     });
 });
 
