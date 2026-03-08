@@ -93,8 +93,10 @@
                                 <td>
                                     <% if (log.status === 'Success') { %>
                                         <span class="badge success">Success</span>
+                                    <% } else if (log.status === 'Logout') { %>
+                                        <span class="badge danger">Logout</span>
                                     <% } else { %>
-                                        <span class="badge danger">Failed</span>
+                                        <span class="badge warning">Failed</span>
                                     <% } %>
                                 </td>
                                 <td style="font-weight: 600;">@<%= log.username %></td>

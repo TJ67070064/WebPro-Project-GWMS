@@ -159,7 +159,8 @@ app.post('/login', (req, res) => {
             req.session.user = {
                 id: row.id,
                 name: row.name,
-                role: row.role
+                role: row.role,
+                username: row.username
             };
             
             // แยกเส้นทางเข้าหน้าเว็บตาม Role
@@ -179,8 +180,28 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+    if (req.session.user) {
+        let ip_address = req.ip || req.socket.remoteAddress || 'Unknown IP';
+        if (ip_address === '::1' || ip_address === '::ffff:127.0.0.1') {
+            ip_address = '127.0.0.1 (Localhost)';
+        }
+
+        const username = req.session.user.username || 'Unknown';
+        const displayName = req.session.user.name || 'Unknown';
+
+        db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
+            [username, displayName, 'Logout', ip_address], 
+            (err) => {
+                if (err) console.error("Error logging logout:", err.message);
+    
+                req.session.destroy();
+                res.redirect('/');
+            }
+        );
+    } else {
+        req.session.destroy();
+        res.redirect('/');
+    }
 });
 
 // ==========================================
