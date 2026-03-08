@@ -96,12 +96,10 @@ const db = new sqlite3.Database('./database.db', (err) => {
             // --- สร้างตาราง ActivityLog ---
             db.run(`CREATE TABLE IF NOT EXISTS ActivityLog (
                 log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
+                username TEXT,
                 timestamp TEXT DEFAULT (DATETIME('now','localtime')),
                 activity_type TEXT,
-                product_id INTEGER,
-                FOREIGN KEY (user_id) REFERENCES Users(id),
-                FOREIGN KEY (product_id) REFERENCES Inventory(id)
+                product_name TEXT
             )`);
 
             const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
@@ -117,14 +115,14 @@ const db = new sqlite3.Database('./database.db', (err) => {
 // Activity Log Function
 // ==========================================
 
-function logActivity(userId, activity, productId) {
+function logActivity(username, activity, product_name) {
 
     const sql = `
-    INSERT INTO ActivityLog (user_id, activity_type, product_id)
+    INSERT INTO ActivityLog (username, activity_type, product_name)
     VALUES (?, ?, ?)
     `;
 
-    db.run(sql, [userId, activity, productId], (err) => {
+    db.run(sql, [username, activity, product_name], (err) => {
         if (err) {
             console.error("Log error:", err.message);
         }
@@ -235,16 +233,6 @@ app.get('/home', (req, res) => {
     });
 });
 
-
-app.get('/history', (req, res) => {
-    if (!req.session.user) return res.redirect('/');
-
-    res.render('history', {
-        user: req.session.user,
-        currentPage: 'history'
-    });
-});
-
 app.get('/inventory', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
@@ -284,7 +272,7 @@ app.post('/inventory/add', (req, res) => {
         }
 
         //keeplog
-        logActivity(req.session.user.id, "ADD_PRODUCT", this.lastID);
+        logActivity(req.session.user.name, "ADD_PRODUCT", name);
 
         res.redirect('/inventory');
     });
@@ -313,14 +301,17 @@ app.post('/inventory/edit/:id', (req, res) => {
         }
 
         //keeplog
-        logActivity(req.session.user.id, "EDIT_PRODUCT", productId);
+        logActivity(req.session.user.name, "EDIT_PRODUCT", name);
         res.redirect('/inventory'); // อัปเดตเสร็จให้กลับไปหน้าคลังสินค้า
     });
 });
 
+//DELETE
 // Route สำหรับลบสินค้า (Delete Product)
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
+    
+    // const { name, details, brand, category, zone, quantity, image } = req.body;
 
     // ป้องกัน Staff ลบสินค้า
     if (req.session.user.role === 'staff') {
@@ -329,16 +320,61 @@ app.post('/inventory/delete/:id', (req, res) => {
 
     const productId = req.params.id;
 
-    // คำสั่ง SQL ลบข้อมูลออกจากตาราง Inventory
-    const sql = `DELETE FROM Inventory WHERE id = ?`;
-
-    db.run(sql, productId, function (err) {
+    const selectId = `SELECT name FROM Inventory WHERE id = ?;`;
+    db.get(selectId, [productId], (err, row) => {
         if (err) {
-            console.error('Error deleting product:', err.message);
-            return res.status(500).send("Error deleting product.");
+            console.error("Error fetching product:", err.message);
+            return res.status(500).send("Database error");
         }
-        res.redirect('/inventory');
+
+        const productName = row.name;
+        const deleteProduct = `DELETE FROM Inventory WHERE id = ?`;
+        db.run(deleteProduct, productId, (err) => {
+            if (err) {
+                console.error('Error deleting product:', err.message);
+                return res.status(500).send("Error deleting product.");
+            }
+
+            //Keep Log by calling logActivity() function
+            logActivity(req.session.user.name, "DELETE_PRODUCT", productName);
+            res.redirect('/inventory');
+            });
+        });
+});
+
+// ==========================================
+// History(Activity log)
+// ==========================================
+app.get('/history', (req, res) => {
+
+    if (!req.session.user) return res.redirect('/');
+
+    const sql = `
+    SELECT 
+        log_id,
+        activity_type,
+        timestamp,
+        username,
+        product_name
+    FROM ActivityLog
+    ORDER BY timestamp DESC
+    `;
+
+    db.all(sql, [], (err, rows) => {
+
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
+        }
+
+        res.render('history', {
+            user: req.session.user,
+            currentPage: 'history',
+            logs: rows
+        });
+
     });
+
 });
 
 // ==========================================
