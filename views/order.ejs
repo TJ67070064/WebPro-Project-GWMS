@@ -61,22 +61,32 @@
                 <thead>
                 <tr>
                     <th>หมายเลขใบเบิก</th>
-                    <th>เวลา</th>
+                    <th>สร้างขึ้นเมื่อเวลา</th>
                     <th>รายการที่เบิก</th>
                     <th>ผู้เบิก</th>
                     <th>สถานะ</th>
                     <th>จำนวน</th>
+                    <th>รายละเอียดออเดอร์</th>
                 </tr>
                 </thead>
                 <tbody>
                     <% orders.forEach(order => { %>
                         <tr>
                             <td> <%= order.order_id %> </td>
-                            <td> <%= order.timestamp %> </td>
+                            <td>
+                            <%= new Date(order.timestamp).toLocaleString("th-TH", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            }) %>
+                            </td>
                             <td> <%= order.product_name %> </td>
                             <td> <%= order.user_name %> </td>
                             <td> <%= order.status %> </td>
                             <td> <%= order.order_quantity %> </td>
+                            <td> <%= order.detail %> </td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -86,7 +96,7 @@
 
     <!-- Overlay สำหรับโชว์รายการสินค้าทั้งหมด เพื่อสร้าง Order อีกที -->
     <section class="modal-overlay" id="showInventoryModal">
-        <div class="modal-box">
+        <div class="modal-box show-inventory-box">
             <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">รายการสินค้าทั้งหมดที่สามารถเพิ่มได้</h2>
             <!-- <form id="orderForm" method="POST" action="/orders/add"> -->
             <table>
@@ -119,12 +129,14 @@
                     <label class="modal-label" for="quantity">จำนวนที่ต้องการเบิกในออเดอร์</label>
                     <input type="number" id="addMaxQuantity" name="quantity" required min="1" class="form-control modal-input">
                 </div>
+                <div>
+                    <label class="modal-label" for="detail">รายละเอียดที่เขียนในใบออเดอร์</label>
+                    <input type="text" id="" name="detail" class="form-control modal-input" placeholder="โปรดระบุรายละเอียด">
+                </div>
                 <button type="submit">สร้างออเดอร์</button>
             </form>
         </div>
     </section>
-
-    
 
     <script>
         async function openShowInventory() {
@@ -148,7 +160,7 @@
         async function showProduct(itemId) {
             const response = await fetch(`/api/product/${itemId}`);
             const inventory = await response.json();
-            
+
             document.getElementById("addMaxQuantity").max = inventory.quantity;
             document.getElementById("addMaxQuantity").value = 1; //Reset default quantity
             document.getElementById("addOrderForm").action = `/orders/add-orders/${itemId}`;

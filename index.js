@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const { stat } = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
@@ -42,7 +43,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
             )`);
 
             // ใส่ข้อมูล User จำลอง
-            const insertUsers = `INSERT OR IGNORE INTO Users (username, password, name, role) VALUES 
+            const insertUsers = `INSERT OR IGNORE INTO Users (username, password, name, role) VALUES
                 ('admin', '1234', 'TJ', 'admin'),
                 ('manager', '1234', 'Somyod', 'manager'),
                 ('staff1', '1234', 'Somchai', 'staff')`;
@@ -67,7 +68,40 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 ('Les Paul Standard', 'Heritage Cherry Sunburst', 'Gibson', 'Electric', 'GIB-LP-050', 'Zone A / Rack 08', 2, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
                 ('D-28 Acoustic', 'Natural', 'Martin', 'Acoustic', 'MAR-D28-002', 'Zone B / Shelf 02', 5, 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=200&auto=format&fit=crop'),
                 ('RG550 Genesis', 'Desert Sun Yellow', 'Ibanez', 'Electric', 'IBZ-RG-112', 'Zone A / Rack 22', 0, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
-                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'https://images.unsplash.com/photo-1621255799738-f860fb41f103?q=80&w=200&auto=format&fit=crop')`;
+                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'https://images.unsplash.com/photo-1621255799738-f860fb41f103?q=80&w=200&auto=format&fit=crop'),
+                ('Stratocaster Pro II', 'Dark Night', 'Fender', 'Electric', 'FND-STR-001', 'Zone A / Rack 12', 12, 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?q=80&w=200&auto=format&fit=crop'),
+                ('Les Paul Standard', 'Heritage Cherry Sunburst', 'Gibson', 'Electric', 'GIB-LP-050', 'Zone A / Rack 08', 2, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
+                ('D-28 Acoustic', 'Natural', 'Martin', 'Acoustic', 'MAR-D28-002', 'Zone B / Shelf 02', 5, 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=200&auto=format&fit=crop'),
+                ('RG550 Genesis', 'Desert Sun Yellow', 'Ibanez', 'Electric', 'IBZ-RG-112', 'Zone A / Rack 22', 0, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
+                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'https://images.unsplash.com/photo-1621255799738-f860fb41f103?q=80&w=200&auto=format&fit=crop'),
+
+                ('Telecaster Player', 'Butterscotch Blonde', 'Fender', 'Electric', 'FND-TEL-021', 'Zone A / Rack 03', 7, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
+                ('SG Standard', 'Cherry Red', 'Gibson', 'Electric', 'GIB-SG-011', 'Zone A / Rack 09', 3, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
+                ('Jazzmaster Classic', 'Olympic White', 'Fender', 'Electric', 'FND-JZM-030', 'Zone A / Rack 14', 4, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
+                ('Jaguar Player', 'Surf Green', 'Fender', 'Electric', 'FND-JAG-008', 'Zone A / Rack 15', 6, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
+                ('Boss DS-1', 'Orange', 'Boss', 'Pedal', 'PED-BOS-001', 'Zone C / Bin 01', 22, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
+                ('Tube Screamer', 'Green', 'Ibanez', 'Pedal', 'PED-IBZ-002', 'Zone C / Bin 02', 18, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
+                ('Big Muff Pi', 'Black', 'Electro-Harmonix', 'Pedal', 'PED-EHX-003', 'Zone C / Bin 03', 11, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
+                ('DD-7 Digital Delay', 'Blue', 'Boss', 'Pedal', 'PED-BOS-004', 'Zone C / Bin 04', 9, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
+                ('Holy Grail Reverb', 'Silver', 'EHX', 'Pedal', 'PED-EHX-005', 'Zone C / Bin 05', 7, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
+
+                ('Guitar Picks Pack', 'Multi Color', 'Dunlop', 'Accessory', 'ACC-PCK-001', 'Zone D / Bin 02', 300, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
+                ('Capo Standard', 'Black', 'Kyser', 'Accessory', 'ACC-CAP-002', 'Zone D / Bin 03', 54, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
+                ('Strap Leather', 'Brown', 'Fender', 'Accessory', 'ACC-STP-003', 'Zone D / Bin 04', 33, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
+                ('Clip Tuner', 'Black', 'Snark', 'Accessory', 'ACC-TUN-004', 'Zone D / Bin 06', 61, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
+                ('Guitar Stand', 'Metal Black', 'Hercules', 'Accessory', 'ACC-STD-005', 'Zone D / Bin 07', 28, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
+
+                ('Katana 50', 'Black', 'Boss', 'Amplifier', 'AMP-BOS-050', 'Zone E / Shelf 01', 10, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
+                ('Blues Junior', 'Tweed', 'Fender', 'Amplifier', 'AMP-FND-020', 'Zone E / Shelf 02', 5, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
+                ('AC15', 'Black', 'Vox', 'Amplifier', 'AMP-VOX-015', 'Zone E / Shelf 03', 4, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
+                ('DSL40', 'Black', 'Marshall', 'Amplifier', 'AMP-MAR-040', 'Zone E / Shelf 04', 3, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
+                ('Spark 40', 'Black', 'Positive Grid', 'Amplifier', 'AMP-SPK-040', 'Zone E / Shelf 05', 6, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
+
+                ('Bass Precision', 'Sunburst', 'Fender', 'Bass', 'BAS-FND-001', 'Zone F / Rack 01', 3, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
+                ('Jazz Bass', 'Black', 'Fender', 'Bass', 'BAS-FND-002', 'Zone F / Rack 02', 2, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
+                ('SR300', 'Weathered Black', 'Ibanez', 'Bass', 'BAS-IBZ-003', 'Zone F / Rack 03', 4, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
+                ('TRBX304', 'Red', 'Yamaha', 'Bass', 'BAS-YAM-004', 'Zone F / Rack 04', 5, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
+                ('StingRay Ray4', 'Black', 'Sterling', 'Bass', 'BAS-STR-005', 'Zone F / Rack 05', 2, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop');`;
             db.run(insertInventory);
 
             // --- สร้างตาราง Order ---
@@ -81,7 +115,8 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 timestamp TEXT DEFAULT (DATETIME('now', 'localtime')),
                 FOREIGN KEY (item_id) REFERENCES Inventory(id),
                 FOREIGN KEY (user_id) REFERENCES Users(id)
-            )`);
+                );`);
+                
 
             const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
                                 SELECT ?, ?, ?, ?, ?
@@ -332,6 +367,7 @@ app.get('/orders', (req, res) => {
         Orders.timestamp,
         Orders.order_quantity,
         Orders.status,
+        Orders.detail,
         Inventory.name AS product_name,
         Users.name AS user_name
         FROM Orders
@@ -363,13 +399,30 @@ app.get('/orders/add-orders', (req, res) => {
 });
 
 app.post('/orders/add-orders/:id', (req, res) => {
-    const allProduct = `INSERT INTO Orders
-                        VALUES(?, ?, ?);`;
-    db.all(allProduct, (err, rows) => {
+    const allProduct = `INSERT INTO Orders(item_id, user_id, status, detail, order_quantity)
+                        VALUES(?, ?, ?, ?, ?);`;
+    const inventoryId = req.params.id; //ยังไม่ใช้ ค่อยรอแก้ตอนใช้แบบ foregin key
+    const user_id = req.session.user.id;
+    const role = req.session.user.role;
+    const { detail, quantity } = req.body;
+    let status;
+    if (role == "staff") {
+        status = "รอการอนุมัติ";
+    } else {
+        status = "กำลังเตรียมสินค้า";
+    }
+    db.all(allProduct, [inventoryId, user_id, status, detail, quantity], (err, rows) => {
         if (err) {
-            return res.status(500).send("Database Error");
+            return res.status(500).send("Database Error" + err);
         }
-        res.json(rows);
+        //INSERT เสร็จต้องไปลบรายการออกจาก Inventory ด้วย
+        const reduceInventory = ``;
+        db.run(reduceInventory, [], (err) => {
+            if (err) {
+                return console.error(err);
+            }
+        });
+        res.redirect('/orders');
     });
 });
 
@@ -396,11 +449,11 @@ app.get('/api/inventory/history/:id', (req, res) => {
 
     const itemId = req.params.id;
     const sql = `
-        SELECT 
-            Orders.order_id, 
-            Orders.order_quantity, 
-            Orders.status, 
-            Orders.detail, 
+        SELECT
+            Orders.order_id,
+            Orders.order_quantity,
+            Orders.status,
+            Orders.detail,
             Orders.timestamp,
             Users.name AS user_name
         FROM Orders

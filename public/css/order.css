@@ -11,3 +11,9 @@
     align-items: center;
     margin-bottom: 20px;
 }
+
+.show-inventory-box {
+    overflow-y: auto;
+    height: 70vh;
+    max-width: 600px;
+}
