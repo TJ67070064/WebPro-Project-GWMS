@@ -42,75 +42,76 @@
     margin-bottom: 30px;
 }
 
-.filter-row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
+.filter-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
 }
 
-/* row2 */
-
-.filter-row + .filter-row{
-    margin-top: 15px;
-}
-
-/* label spacing */
-
-.filter-group label{
-    display:block;
-    margin-bottom:10px;
-    font-size:13px;
-    color:#a1a1a1;
-}
-
-/* input spacing */
-
-.filter-group input{
-    margin-top:2px;
-}
-
-.filter-group {
-    flex: 1;
-    min-width: 220px;
+.filter-btn-wrap {
+	display: flex;
+	align-items: flex-end;
 }
 
 .filter-group label {
-    display: block;
     margin-bottom: 8px;
     font-size: 13px;
     color: #a1a1a1;
 }
 
 .filter-group input,
-.filter-group select {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.3);
-    color: white;
+.filter-group select{
+	width:100%;
+	padding:12px 40px 12px 12px;
+	border-radius:10px;
+	border:1px solid rgba(255,255,255,0.1);
+	background:rgba(0,0,0,0.3);
+	color:white;
+	appearance:none;
+	-webkit-appearance:none;
+	-moz-appearance:none;
+	cursor:pointer;
 }
 
-.filter-group input[name="product"]{
-    max-width: 450px;
+/* dropdown arrow */
+
+.filter-group{
+	position:relative;
+}
+
+.filter-group select{
+	background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+	background-repeat:no-repeat;
+	background-position:right 12px center;
+	background-size:18px;
+}
+
+.filter-submit{
+	margin-top:20px;
 }
 
 .filter-btn {
+    margin-top:10px;
+    width: 100%;
+    padding: 13px;
     background: #eead2b;
     border: none;
-    padding: 12px 25px;
     border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
+    font-weight:700;
+	cursor:pointer;
+}
+
+.filter-btn:hover {
+	background: #f6b73f;
 }
 
 /* Quick Filters */
-.quick-filters {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+.quick-filters{
+    border-top:2px solid rgba(255,255,255,0.06);
+    padding-top: 20px;
+    margin-top:25px;
+	display:flex;
+	gap:10px;
 }
 
 .quick-pill {
@@ -118,6 +119,10 @@
     border-radius: 20px;
     font-size: 12px;
     border: 1px solid;
+}
+
+.quick-pill:hover{
+	background:rgba(255,255,255,0.05);
 }
 
 .pill-inbound { color:#22c55e; border-color:#22c55e; }
