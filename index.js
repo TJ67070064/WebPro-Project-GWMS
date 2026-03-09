@@ -488,6 +488,9 @@ app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
 app.get('/orders', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
+    const errMsg = req.session.errMsg;
+    req.session.errMsg = null; //clear errMsg
+
     const selectOrders = `SELECT
         Orders.order_id,
         Orders.timestamp,
@@ -535,11 +538,13 @@ app.get('/orders', (req, res) => {
             cntRows.forEach(row => {
                 statsObject[row.status] = row.total; //เพื่อบอกว่าถ้าเจอ row ไหนก็ใส่ค่าให้ row นั้น ถ้าไม่เจอจะกลายเป็น 0 (default) เอง
             })
+
             res.render('order', {
                 user: req.session.user,
                 currentPage: 'orders',
                 orders: dataRows,
-                stats: statsObject
+                stats: statsObject,
+                errMsg: errMsg
             });
         });
     })
@@ -563,29 +568,46 @@ app.post('/orders/add-orders/:id', (req, res) => {
     const role = req.session.user.role;
     const { detail, inputQuantity } = req.body;
 
-    let status;
-    if (role == "staff") {
-        status = "รอการอนุมัติ";
-    } else {
-        status = "กำลังเตรียมสินค้า";
-    }
-    db.run(insertOrder, [inventoryId, user_id, status, detail, inputQuantity], (err) => {
+    const selectQty = `SELECT quantity FROM Inventory WHERE id = ?`;
+    db.get(selectQty, [ inventoryId ], (err, row) => {
+        //ทำการเช็คก่อนว่า inputQuantity มันเยอะกว่า quantity ใน Inventory หรือกรณีใส่เลข 0 และ negative numbers
         if (err) {
-            return res.status(500).send("Database Error" + err);
+                return res.status(500).send("Database Error" + err);
         }
-        //INSERT เสร็จต้องไปลบรายการออกจาก Inventory ด้วย
-        // const currentQuantity = inventory.quantity - quantity;
-        const reduceInventory = `UPDATE Inventory
-                                SET quantity = quantity - ?
-                                WHERE id = ?;`;
-        db.run(reduceInventory, [inputQuantity, inventoryId], (err) => {
+
+        if (!inputQuantity || inputQuantity <= 0) {
+            // return res.status(400).send("จำนวนไม่ถูกต้อง");
+            req.session.errMsg = "จำนวนไม่ถูกต้อง";
+            return res.redirect('/orders');
+        }
+        if (inputQuantity > row) {
+            return res.status(400).send("จำนวนเกินสต็อก");
+        }
+
+        let status;
+        if (role == "staff") {
+            status = "รอการอนุมัติ";
+        } else {
+            status = "กำลังเตรียมสินค้า";
+        }
+        db.run(insertOrder, [inventoryId, user_id, status, detail, inputQuantity], (err) => {
             if (err) {
-                return console.error(err);
+                return res.status(500).send("Database Error" + err);
             }
-            res.redirect('/orders');
+            //INSERT เสร็จต้องไปลบรายการออกจาก Inventory ด้วย
+            // const currentQuantity = inventory.quantity - quantity;
+            const reduceInventory = `UPDATE Inventory
+                                    SET quantity = quantity - ?
+                                    WHERE id = ?;`;
+            db.run(reduceInventory, [inputQuantity, inventoryId], (err) => {
+                if (err) {
+                    return console.error(err);
+                }
+                res.redirect('/orders');
+            });
+        });
         });
     });
-});
 //!SECTION
 
 // ==========================================

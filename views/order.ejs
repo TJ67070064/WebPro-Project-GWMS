@@ -156,6 +156,17 @@
         </div>
     </section>
 
+    <!-- หน้าสำหรับโชว์ Error หลังเกิดข้อผิดพลาดจากการสร้าง Order -->
+    <section class="modal-overlay" id="errorModal">
+        <div class="modal-box" id="errorBox">
+            <h2 id="errMsgLabel" style="margin-bottom: 5px; font-size: 20px;">เกิดข้อผิดพลาด</h2>
+            <p id="errMsgDetail"></p>
+            <form method="GET" action="/orders">
+                <button type="submit">กลับไปหน้าออเดอร์</button>
+            </form>
+        </div>
+    </section>
+
     <script>
         async function openShowInventory() {
             const response = await fetch('/orders/add-orders');
@@ -200,6 +211,12 @@
             openModal("addOrderModal");
         }
 
+        function showError(message) {
+            console.log("Error happended");
+            document.getElementById("errMsgDetail").innerHTML = message;
+            openModal("errorModal");
+        }
+
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.style.display = 'flex';
@@ -218,5 +235,10 @@
             }
         }
     </script>
+    <% if (errMsg) { %>
+        <script>
+        showError("<%= errMsg %>");
+        </script>
+    <% } %>
 </body>
 </html>

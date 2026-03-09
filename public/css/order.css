@@ -150,3 +150,32 @@ Table inside modal
     box-shadow: 0 6px 14px rgba(238,173,43,0.3);
 }
 /* !SECTION */
+
+#errorBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#errMsgLabel {
+    color: var(--error);
+}
+
+#errorModal button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: #1a1a1b;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#errorModal button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
