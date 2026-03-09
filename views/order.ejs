@@ -67,9 +67,9 @@
             <table class="custom-table">
                 <thead>
                 <tr>
-                    <th>หมายเลขใบเบิก</th>
+                    <th>สินค้าที่เบิก</th>
+                    <th>รหัสสินค้า (SKU)</th>
                     <th>สร้างขึ้นเมื่อเวลา</th>
-                    <th>รายการที่เบิก</th>
                     <th>ผู้เบิก</th>
                     <th>สถานะ</th>
                     <th>จำนวน</th>
@@ -79,7 +79,18 @@
                 <tbody>
                     <% orders.forEach(order => { %>
                         <tr>
-                            <td> <%= order.order_id %> </td>
+                            <td>
+                                <div class="product-cell">
+                                    <div class="icon-box" style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                                        <img src="<%= order.image || 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop' %>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop';" alt="<%= order.product_name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div class="product-info">
+                                        <h4><%= order.product_name %></h4>
+                                        <p><%= order.details %></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td> <%= order.sku %> </td>
                             <td>
                             <%= new Date(order.timestamp).toLocaleString("th-TH", {
                                 day: "numeric",
@@ -89,7 +100,7 @@
                                 minute: "2-digit"
                             }) %>
                             </td>
-                            <td> <%= order.product_name %> </td>
+                            <!-- Join มาเรียบร้อยแล้ว สามารถใช้ item_id, user_name ได้ -->
                             <td> <%= order.user_name %> </td>
                             <td> <%= order.status %> </td>
                             <td> <%= order.order_quantity %> </td>
@@ -152,9 +163,19 @@
             const tableBody = document.getElementById("inventoryTableBody");
             tableBody.innerHTML = ""; //เคลียร์ body ก่อน
             inventory.forEach((row) => {
+                //fallback (หลัง ||) ใช้ตอน src เป็น null, onerror ใช้ตอน src link เสีย
                     tableBody.innerHTML += `
                         <tr>
-                            <td>${row.name}</td>
+                            <td>
+                                <div class="product-cell">
+                                    <div class="icon-box-overlay">
+                                        <img src="${row.image || 'https://surl.li/bwxsnz'}" onerror="this.src='https://surl.li/bwxsnz'">
+                                    </div>
+                                    <div class="product-info">
+                                        <h4>${row.name}</h4>
+                                    </div>
+                                </div>
+                            </td>
                             <td>${row.sku}</td>
                             <td>${row.quantity}</td>
                             <td><button onclick="showProduct(${row.id})">+</button></td>

@@ -12,12 +12,66 @@
     margin-bottom: 20px;
 }
 
+.icon-box-overlay img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Modal for showing inventory list */
 .show-inventory-box {
+    width: 90%;
+    max-width: 900px;
+    max-height: 80vh;
     overflow-y: auto;
-    height: 70vh;
-    max-width: 600px;
-    /* display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column; */
+}
+
+.show-inventory-box table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+Table inside modal
+.show-inventory-box table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.show-inventory-box th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.show-inventory-box td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+}
+
+.show-inventory-box tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.show-inventory-box button {
+    background: var(--primary);
+    border: none;
+    color: #1a1a1b;
+    font-weight: 700;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.show-inventory-box button:hover {
+    background: var(--primary-hover);
+    transform: scale(1.05);
 }

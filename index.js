@@ -22,7 +22,7 @@ app.use(session({
 }));
 
 // ==========================================
-// 2. เชื่อมต่อและตั้งค่าฐานข้อมูล SQLite
+// SECTION 2. DB & เชื่อมต่อและตั้งค่าฐานข้อมูล SQLite
 // ==========================================
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
@@ -138,6 +138,8 @@ const db = new sqlite3.Database('./database.db', (err) => {
         });
     }
 });
+//!SECTION
+
 // ==========================================
 // Activity Log Function
 // ==========================================
@@ -157,7 +159,7 @@ function logActivity(username, activity, product_name) {
 }
 
 // ==========================================
-// 3. ระบบ Authentication (Login / Logout)
+// SECTION 3. ระบบ Authentication (Login / Logout)
 // ==========================================
 app.get('/', (req, res) => {
     res.render('login', { error: null });
@@ -230,9 +232,10 @@ app.get('/logout', (req, res) => {
         res.redirect('/');
     }
 });
+//!SECTION
 
 // ==========================================
-// 4. หน้าหลัก (Home & Inventory)
+// SECTION 4. หน้าหลัก (Home & Inventory)
 // ==========================================
 
 app.get('/home', (req, res) => {
@@ -389,9 +392,10 @@ app.post('/inventory/delete/:id', (req, res) => {
             });
         });
 });
+//!SECTION
 
 // ==========================================
-// History(Activity log)
+// SECTION History(Activity log)
 // ==========================================
 app.get('/history', (req, res) => {
 
@@ -424,9 +428,10 @@ app.get('/history', (req, res) => {
     });
 
 });
+//!SECTION
 
 // ==========================================
-// 5. ระบบจัดการแอดมิน (Admin Tools)
+// SECTION 5. ระบบจัดการแอดมิน (Admin Tools)
 // ==========================================
 const requireAdmin = (req, res, next) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
@@ -476,9 +481,9 @@ app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
         res.redirect('/admintool');
     });
 });
-
+//!SECTION
 // ==========================================
-// 6. เข้าสู่หน้า Order Management
+// SECTION 6. เข้าสู่หน้า Order Management
 // ==========================================
 app.get('/orders', (req, res) => {
     if (!req.session.user) return res.redirect('/');
@@ -490,6 +495,9 @@ app.get('/orders', (req, res) => {
         Orders.status,
         Orders.detail,
         Inventory.name AS product_name,
+        Inventory.image AS image,
+        Inventory.sku AS sku,
+        Inventory.details AS details,
         Users.name AS user_name
         FROM Orders
         JOIN Inventory ON Orders.item_id = Inventory.id
@@ -577,9 +585,10 @@ app.post('/orders/add-orders/:id', (req, res) => {
         });
     });
 });
+//!SECTION
 
 // ==========================================
-// API Routes
+// SECTION API Routes
 // ==========================================
 app.get('/api/product/:id', (req, res) => {
     const productId = req.params.id;
@@ -622,6 +631,7 @@ app.get('/api/inventory/history/:id', (req, res) => {
         res.json(rows);
     });
 });
+//!SECTION
 
 // ==========================================
 // 7. เริ่มการทำงานเซิร์ฟเวอร์
