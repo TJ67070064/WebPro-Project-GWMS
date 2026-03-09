@@ -25,7 +25,7 @@
                     <input type="text" class="form-control" placeholder="ค้นหา...">
                 </div>
                 <div>
-                    <button onclick="openModal('addOrderModal')" class="btn-primary" style="width: auto; padding: 10px 20px; margin-top: 0;">
+                    <button onclick="openShowInventory('showInventoryModal')" class="btn-primary" style="width: auto; padding: 10px 20px; margin-top: 0;">
                         <span class="material-symbols-outlined">add_notes</span>เพิ่มออเดอร์
                     </button>
                 </div>
@@ -36,22 +36,29 @@
             <div class="stat-card">
                 <div class="stat-title">รอการอนุมัติ</div>
                 <div class="stat-info">
-                    <h2>12</h2>
+                    <h2><%= stats["รอการอนุมัติ"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--info);">pending_actions</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">กำลังจัดส่ง</div>
+                <div class="stat-title">กำลังเตรียมสินค้า</div>
                 <div class="stat-info">
-                    <h2>5</h2>
+                    <h2><%= stats["กำลังเตรียมสินค้า"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--warning);">shopping_cart</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">เสร็จสิ้น</div>
+                <div class="stat-title">รอการจัดส่ง</div>
                 <div class="stat-info">
-                    <h2>8</h2>
+                    <h2><%= stats["รอการจัดส่ง"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--success);">local_shipping</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">สินค้าออกจากโกดัง</div>
+                <div class="stat-info">
+                    <h2><%= stats["สินค้าออกจากโกดัง"] %></h2>
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: var(--warning);">delivery_truck_speed</span>
                 </div>
             </div>
         </section>
@@ -60,28 +67,178 @@
             <table class="custom-table">
                 <thead>
                 <tr>
-                    <th>หมายเลขใบเบิก</th>
-                    <th>เวลา</th>
-                    <th>รายการที่เบิก</th>
+                    <th>สินค้าที่เบิก</th>
+                    <th>รหัสสินค้า (SKU)</th>
+                    <th>สร้างขึ้นเมื่อเวลา</th>
                     <th>ผู้เบิก</th>
                     <th>สถานะ</th>
                     <th>จำนวน</th>
+                    <th>รายละเอียดออเดอร์</th>
                 </tr>
                 </thead>
                 <tbody>
                     <% orders.forEach(order => { %>
                         <tr>
-                            <td> <%= order.order_id %> </td>
-                            <td> <%= order.timestamp %> </td>
-                            <td> <%= order.product_name %> </td>
+                            <td>
+                                <div class="product-cell">
+                                    <div class="icon-box" style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                                        <img src="<%= order.image || 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop' %>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop';" alt="<%= order.product_name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div class="product-info">
+                                        <h4><%= order.product_name %></h4>
+                                        <p><%= order.details %></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td> <%= order.sku %> </td>
+                            <td>
+                            <%= new Date(order.timestamp).toLocaleString("th-TH", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            }) %>
+                            </td>
+                            <!-- Join มาเรียบร้อยแล้ว สามารถใช้ item_id, user_name ได้ -->
                             <td> <%= order.user_name %> </td>
                             <td> <%= order.status %> </td>
                             <td> <%= order.order_quantity %> </td>
+                            <td> <%= order.detail %> </td>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
         </section>
     </main>
+
+    <!-- Overlay สำหรับโชว์รายการสินค้าทั้งหมด เพื่อสร้าง Order อีกที -->
+    <section class="modal-overlay" id="showInventoryModal">
+        <div class="modal-box show-inventory-box">
+            <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">รายการสินค้าทั้งหมดที่สามารถเพิ่มได้</h2>
+            <!-- <form id="orderForm" method="POST" action="/orders/add"> -->
+            <table>
+                <thead>
+                    <tr>
+                        <!-- ตามใน Inventory เลย -->
+                        <th>รายละเอียดสินค้า</th>
+                        <th>รหัสสินค้า</th>
+                        <th>จำนวน</th>
+                        <th>สร้างออเดอร์</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Overlay สำหรับการใส่ Quantity เพื่อสร้าง Order ของสินค้านั้น -->
+    <section class="modal-overlay" id="addOrderModal">
+        <div class="modal-box">
+            <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">รายการสินค้า</h2>
+            <p>เลือกจำนวนที่สินค้าสำหรับออเดอร์</p>
+            <form id="addOrderForm" method="POST">
+            <!-- action="/orders/add-orders/:id" เพิ่ม action ใน function-->
+                <img id="addOrderImg">
+                <h4 id="addOrderName"></h4>
+                <h4 id="addOrderQty"></h4>
+                <div>
+                    <label class="modal-label" for="inputQuantity">จำนวนที่ต้องการเบิกในออเดอร์</label>
+                    <input type="number" id="addMaxQuantity" name="inputQuantity" required min="0" class="form-control modal-input">
+                </div>
+                <div>
+                    <label class="modal-label" for="detail">รายละเอียดที่เขียนในใบออเดอร์</label>
+                    <input type="text" id="" name="detail" class="form-control modal-input" placeholder="โปรดระบุรายละเอียด">
+                </div>
+                <button type="submit">สร้างออเดอร์</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- หน้าสำหรับโชว์ Error หลังเกิดข้อผิดพลาดจากการสร้าง Order -->
+    <section class="modal-overlay" id="errorModal">
+        <div class="modal-box" id="errorBox">
+            <h2 id="errMsgLabel" style="margin-bottom: 5px; font-size: 20px;">เกิดข้อผิดพลาด</h2>
+            <p id="errMsgDetail"></p>
+            <form method="GET" action="/orders">
+                <button type="submit">กลับไปหน้าออเดอร์</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        async function openShowInventory() {
+            const response = await fetch('/orders/add-orders');
+            const inventory = await response.json();
+            const tableBody = document.getElementById("inventoryTableBody");
+            tableBody.innerHTML = ""; //เคลียร์ body ก่อน
+            inventory.forEach((row) => {
+                //fallback (หลัง ||) ใช้ตอน src เป็น null, onerror ใช้ตอน src link เสีย
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>
+                                <div class="product-cell">
+                                    <div class="icon-box-overlay">
+                                        <img src="${row.image || 'https://surl.li/bwxsnz'}" onerror="this.src='https://surl.li/bwxsnz'">
+                                    </div>
+                                    <div class="product-info">
+                                        <h4>${row.name}</h4>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${row.sku}</td>
+                            <td>${row.quantity}</td>
+                            <td><button onclick="showProduct(${row.id})">+</button></td>
+                        </tr>
+                        `
+            });
+            openModal("showInventoryModal");
+        }
+
+        async function showProduct(itemId) {
+            const response = await fetch(`/api/product/${itemId}`);
+            const inventory = await response.json();
+
+            document.getElementById("addMaxQuantity").max = inventory.quantity;
+            document.getElementById("addMaxQuantity").value = 0; //Reset default quantity
+            document.getElementById("addOrderForm").action = `/orders/add-orders/${itemId}`;
+            document.getElementById("addOrderImg").src = inventory.image;
+            document.getElementById("addOrderName").innerHTML = inventory.name;
+            document.getElementById("addOrderQty").innerHTML = "จำนวนที่มีในคลัง: " + inventory.quantity;
+
+            closeModal("showInventoryModal");
+            openModal("addOrderModal");
+        }
+
+        function showError(message) {
+            console.log("Error happended");
+            document.getElementById("errMsgDetail").innerHTML = message;
+            openModal("errorModal");
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            modal.classList.add('active'); // เผื่อ style.css ต้องการ class นี้
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
+
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal(event.target.id);
+            }
+        }
+    </script>
+    <% if (errMsg) { %>
+        <script>
+        showError("<%= errMsg %>");
+        </script>
+    <% } %>
 </body>
 </html>
