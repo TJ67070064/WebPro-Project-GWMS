@@ -36,22 +36,29 @@
             <div class="stat-card">
                 <div class="stat-title">รอการอนุมัติ</div>
                 <div class="stat-info">
-                    <h2>12</h2>
+                    <h2><%= stats["รอการอนุมัติ"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--info);">pending_actions</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">กำลังจัดส่ง</div>
+                <div class="stat-title">กำลังเตรียมสินค้า</div>
                 <div class="stat-info">
-                    <h2>5</h2>
+                    <h2><%= stats["กำลังเตรียมสินค้า"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--warning);">shopping_cart</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">เสร็จสิ้น</div>
+                <div class="stat-title">รอการจัดส่ง</div>
                 <div class="stat-info">
-                    <h2>8</h2>
+                    <h2><%= stats["รอการจัดส่ง"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--success);">local_shipping</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">สินค้าออกจากโกดัง</div>
+                <div class="stat-info">
+                    <h2><%= stats["สินค้าออกจากโกดัง"] %></h2>
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: var(--warning);">delivery_truck_speed</span>
                 </div>
             </div>
         </section>
@@ -60,9 +67,9 @@
             <table class="custom-table">
                 <thead>
                 <tr>
-                    <th>หมายเลขใบเบิก</th>
+                    <th>สินค้าที่เบิก</th>
+                    <th>รหัสสินค้า (SKU)</th>
                     <th>สร้างขึ้นเมื่อเวลา</th>
-                    <th>รายการที่เบิก</th>
                     <th>ผู้เบิก</th>
                     <th>สถานะ</th>
                     <th>จำนวน</th>
@@ -72,7 +79,18 @@
                 <tbody>
                     <% orders.forEach(order => { %>
                         <tr>
-                            <td> <%= order.order_id %> </td>
+                            <td>
+                                <div class="product-cell">
+                                    <div class="icon-box" style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                                        <img src="<%= order.image || 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop' %>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=150&auto=format&fit=crop';" alt="<%= order.product_name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div class="product-info">
+                                        <h4><%= order.product_name %></h4>
+                                        <p><%= order.details %></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td> <%= order.sku %> </td>
                             <td>
                             <%= new Date(order.timestamp).toLocaleString("th-TH", {
                                 day: "numeric",
@@ -82,7 +100,7 @@
                                 minute: "2-digit"
                             }) %>
                             </td>
-                            <td> <%= order.product_name %> </td>
+                            <!-- Join มาเรียบร้อยแล้ว สามารถใช้ item_id, user_name ได้ -->
                             <td> <%= order.user_name %> </td>
                             <td> <%= order.status %> </td>
                             <td> <%= order.order_quantity %> </td>
@@ -127,13 +145,24 @@
                 <h4 id="addOrderQty"></h4>
                 <div>
                     <label class="modal-label" for="inputQuantity">จำนวนที่ต้องการเบิกในออเดอร์</label>
-                    <input type="number" id="addMaxQuantity" name="inputQuantity" required min="1" class="form-control modal-input">
+                    <input type="number" id="addMaxQuantity" name="inputQuantity" required min="0" class="form-control modal-input">
                 </div>
                 <div>
                     <label class="modal-label" for="detail">รายละเอียดที่เขียนในใบออเดอร์</label>
                     <input type="text" id="" name="detail" class="form-control modal-input" placeholder="โปรดระบุรายละเอียด">
                 </div>
                 <button type="submit">สร้างออเดอร์</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- หน้าสำหรับโชว์ Error หลังเกิดข้อผิดพลาดจากการสร้าง Order -->
+    <section class="modal-overlay" id="errorModal">
+        <div class="modal-box" id="errorBox">
+            <h2 id="errMsgLabel" style="margin-bottom: 5px; font-size: 20px;">เกิดข้อผิดพลาด</h2>
+            <p id="errMsgDetail"></p>
+            <form method="GET" action="/orders">
+                <button type="submit">กลับไปหน้าออเดอร์</button>
             </form>
         </div>
     </section>
@@ -145,9 +174,19 @@
             const tableBody = document.getElementById("inventoryTableBody");
             tableBody.innerHTML = ""; //เคลียร์ body ก่อน
             inventory.forEach((row) => {
+                //fallback (หลัง ||) ใช้ตอน src เป็น null, onerror ใช้ตอน src link เสีย
                     tableBody.innerHTML += `
                         <tr>
-                            <td>${row.name}</td>
+                            <td>
+                                <div class="product-cell">
+                                    <div class="icon-box-overlay">
+                                        <img src="${row.image || 'https://surl.li/bwxsnz'}" onerror="this.src='https://surl.li/bwxsnz'">
+                                    </div>
+                                    <div class="product-info">
+                                        <h4>${row.name}</h4>
+                                    </div>
+                                </div>
+                            </td>
                             <td>${row.sku}</td>
                             <td>${row.quantity}</td>
                             <td><button onclick="showProduct(${row.id})">+</button></td>
@@ -162,14 +201,20 @@
             const inventory = await response.json();
 
             document.getElementById("addMaxQuantity").max = inventory.quantity;
-            document.getElementById("addMaxQuantity").value = 1; //Reset default quantity
+            document.getElementById("addMaxQuantity").value = 0; //Reset default quantity
             document.getElementById("addOrderForm").action = `/orders/add-orders/${itemId}`;
             document.getElementById("addOrderImg").src = inventory.image;
             document.getElementById("addOrderName").innerHTML = inventory.name;
-            document.getElementById("addOrderQty").innerHTML = inventory.quantity;
+            document.getElementById("addOrderQty").innerHTML = "จำนวนที่มีในคลัง: " + inventory.quantity;
 
             closeModal("showInventoryModal");
             openModal("addOrderModal");
+        }
+
+        function showError(message) {
+            console.log("Error happended");
+            document.getElementById("errMsgDetail").innerHTML = message;
+            openModal("errorModal");
         }
 
         function openModal(modalId) {
@@ -190,5 +235,10 @@
             }
         }
     </script>
+    <% if (errMsg) { %>
+        <script>
+        showError("<%= errMsg %>");
+        </script>
+    <% } %>
 </body>
 </html>
