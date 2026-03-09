@@ -41,18 +41,21 @@
 
                 <div class="filter-group">
                     <label>ประเภทของกิจกรรม</label>
-                    <select>
-                        <option>ทั้งหมด</option>
+                    <select name="type">
+                        <option value="">ทั้งหมด</option>
+                        <option value="ADD_PRODUCT">เพิ่ม</option>
+                        <option value="DELETE_PRODUCT">ลบ</option>
+                        <option value="EDIT_PRODUCT">แก้ไข</option>
                     </select>
                 </div>
 
                 <div class="filter-group">
                     <label>พนักงาน</label>
-                    <input type="text" placeholder="ค้นหาพนักงาน...">
+                    <input type="text" name="user" placeholder="ค้นหาพนักงาน...">
                 </div>
 
                 <div style="display:flex;align-items:flex-end;">
-                    <button class="filter-btn">Filter</button>
+                    <button type="submit" class="filter-btn">Filter</button>
                 </div>
             </div>
 
@@ -64,7 +67,7 @@
                 <div class="quick-pill pill-audits">ตรวจสอบ</div>
             </div>
 
-        </div>
+        </form>
 
 
         <!-- Table -->
