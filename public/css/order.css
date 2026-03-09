@@ -12,6 +12,7 @@
     margin-bottom: 20px;
 }
 
+/*SECTION Show All Inventory Overlay */
 .icon-box-overlay img {
     width: 48px;
     height: 48px;
@@ -75,3 +76,77 @@ Table inside modal
     background: var(--primary-hover);
     transform: scale(1.05);
 }
+/*!SECTION */
+
+/*SECTION Create Order Page */
+#addOrderModal .modal-box {
+    max-width: 420px;
+    text-align: center;
+}
+
+/* Product Image */
+#addOrderImg {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 10px auto 15px auto;
+    display: block;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--surface-1);
+}
+
+/* Product Name */
+#addOrderName {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+/* Product Quantity in Inventory */
+#addOrderQty {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* Form Layout */
+#addOrderForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Label */
+.modal-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+/* Inputs */
+.modal-input {
+    width: 100%;
+}
+
+/* Submit Button */
+#addOrderForm button {
+    margin-top: 10px;
+    padding: 12px;
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #1a1a1b;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+#addOrderForm button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(238,173,43,0.3);
+}
+/* !SECTION */

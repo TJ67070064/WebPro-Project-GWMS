@@ -562,6 +562,7 @@ app.post('/orders/add-orders/:id', (req, res) => {
     const user_id = req.session.user.id;
     const role = req.session.user.role;
     const { detail, inputQuantity } = req.body;
+
     let status;
     if (role == "staff") {
         status = "รอการอนุมัติ";

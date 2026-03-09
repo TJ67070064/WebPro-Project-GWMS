@@ -145,7 +145,7 @@
                 <h4 id="addOrderQty"></h4>
                 <div>
                     <label class="modal-label" for="inputQuantity">จำนวนที่ต้องการเบิกในออเดอร์</label>
-                    <input type="number" id="addMaxQuantity" name="inputQuantity" required min="1" class="form-control modal-input">
+                    <input type="number" id="addMaxQuantity" name="inputQuantity" required min="0" class="form-control modal-input">
                 </div>
                 <div>
                     <label class="modal-label" for="detail">รายละเอียดที่เขียนในใบออเดอร์</label>
@@ -190,11 +190,11 @@
             const inventory = await response.json();
 
             document.getElementById("addMaxQuantity").max = inventory.quantity;
-            document.getElementById("addMaxQuantity").value = 1; //Reset default quantity
+            document.getElementById("addMaxQuantity").value = 0; //Reset default quantity
             document.getElementById("addOrderForm").action = `/orders/add-orders/${itemId}`;
             document.getElementById("addOrderImg").src = inventory.image;
             document.getElementById("addOrderName").innerHTML = inventory.name;
-            document.getElementById("addOrderQty").innerHTML = inventory.quantity;
+            document.getElementById("addOrderQty").innerHTML = "จำนวนที่มีในคลัง: " + inventory.quantity;
 
             closeModal("showInventoryModal");
             openModal("addOrderModal");
