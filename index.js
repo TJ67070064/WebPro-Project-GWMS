@@ -401,7 +401,9 @@ app.get('/history', (req, res) => {
 
     if (!req.session.user) return res.redirect('/');
 
-    const sql = `
+    const { startDate, endDate, type, user } = req.query;
+
+    let sql = `
     SELECT 
         log_id,
         activity_type,
@@ -409,10 +411,34 @@ app.get('/history', (req, res) => {
         username,
         product_name
     FROM ActivityLog
-    ORDER BY timestamp DESC
+    WHERE 1=1
     `;
 
-    db.all(sql, [], (err, rows) => {
+    const params = [];
+
+    if (type) {
+        sql += " AND activity_type = ?";
+        params.push(type);
+    }
+
+    if (user) {
+        sql += " AND username LIKE ?";
+        params.push(`%${user}%`);
+    }
+
+    if (startDate) {
+        sql += " AND DATE(timestamp) >= ?";
+        params.push(startDate);
+    }
+
+    if (endDate) {
+        sql += " AND DATE(timestamp) <= ?";
+        params.push(endDate);
+    }
+
+    sql += " ORDER BY timestamp DESC";
+
+    db.all(sql, params, (err, rows) => {
 
         if (err) {
             console.error(err.message);
