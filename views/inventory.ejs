@@ -30,7 +30,6 @@
             width: 100%;
             max-width: 500px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            /* บังคับให้โชว์ 100% เผื่อ style.css ซ่อนไว้ */
             opacity: 1 !important;
             visibility: visible !important;
             transform: scale(1) !important;
@@ -40,6 +39,12 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .modal-label { font-size: 13px; font-weight: 500; color: #333; }
         .modal-input { width: 100%; margin-top: 5px; }
+
+        /* เพิ่ม CSS สำหรับปุ่มแบ่งหน้าที่กดไม่ได้ */
+        .page-item.disabled {
+            pointer-events: none;
+            opacity: 0.4;
+        }
     </style>
 </head>
 
@@ -160,14 +165,36 @@
                                 </tr>
                             <% }) %>
                         <% } else { %>
-                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;"><p>ไม่พบสินค้าในคลัง</p></td></tr>
+                            <tr><td colspan="7" id="noDataRow" style="text-align: center; color: var(--text-muted); padding: 40px;"><span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 10px;">inventory_2</span><p>ไม่พบสินค้าในคลัง</p></td></tr>
                         <% } %>
                     </tbody>
                 </table>
+                
                 <div class="pagination-wrapper">
-                    <div class="pagination-info">แสดง <strong>1</strong> ถึง <strong id="visibleCount"><%= products ? products.length : 0 %></strong> </div>
+                    <div class="pagination-info" id="visibleCountDisplay">
+                        กำลังโหลดข้อมูล...
+                    </div>
+                    <div class="pagination" id="paginationControls">
+                        </div>
                 </div>
+
             </div>
+
+            <footer class="dash-footer">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <strong style="color: var(--primary);">GWMS</strong>
+                    <span>v2.4.1 (Stable)</span>
+                </div>
+                <div style="text-transform: uppercase; letter-spacing: 1px;">
+                    © 2026 Guitar Warehouse Systems. การเชื่อมต่อที่ปลอดภัย
+                </div>
+                <div class="links">
+                    <a href="#">นโยบายความเป็นส่วนตัว</a>
+                    <a href="#">ข้อกำหนด</a>
+                    <a href="#">ศูนย์ช่วยเหลือ</a>
+                </div>
+            </footer>
+
         </main>
 
         <div id="addModal" class="modal-overlay">
@@ -320,45 +347,28 @@
 
             function openDeleteModal(id, name) {
                 document.getElementById('deleteItemName').textContent = name;
-                //เพิ่ม action ตรงนี้
                 document.getElementById('deleteProductForm').action = '/inventory/delete/' + id;
                 openModal('deleteConfirmModal');
             }
 
             function openEditProductModal(btn) {
-
                 document.getElementById('editProductForm').action = '/inventory/edit/' + btn.getAttribute('data-id');
-
                 document.getElementById('editName').value = btn.getAttribute('data-name');
                 document.getElementById('editSku').value = btn.getAttribute('data-sku');
-
                 const brand = btn.getAttribute('data-brand');
                 const brandSelect = document.getElementById('editBrand');
 
-                // ตรวจbrandในdropdown
                 let exists = false;
                 for (let option of brandSelect.options) {
-                    if (option.value === brand) {
-                        exists = true;
-                        break;
-                    }
+                    if (option.value === brand) { exists = true; break; }
                 }
-
-                // ถ้าไม่มี เพิ่ม option
                 if (!exists) {
                     const newOption = document.createElement("option");
-                    newOption.value = brand;
-                    newOption.text = brand;
-                    
+                    newOption.value = brand; newOption.text = brand;
                     const otherOption = brandSelect.querySelector('option[value="other"]');
-
-                    if (otherOption) {
-                        brandSelect.insertBefore(newOption, otherOption);
-                    } else {
-                        brandSelect.appendChild(newOption);
-                    }
+                    if (otherOption) brandSelect.insertBefore(newOption, otherOption);
+                    else brandSelect.appendChild(newOption);
                 }
-
                 brandSelect.value = brand;
 
                 document.getElementById('editCategory').value = btn.getAttribute('data-category');
@@ -366,69 +376,37 @@
                 document.getElementById('editQuantity').value = btn.getAttribute('data-quantity');
                 document.getElementById('editDetails').value = btn.getAttribute('data-details');
                 document.getElementById('editImage').value = btn.getAttribute('data-image');
-
                 openModal('editModal');
             }
 
             function toggleOtherBrand(){
-
                 const select = document.getElementById("brandSelect");
                 const input = document.getElementById("otherBrandInput");
-
                 if(select.value === "other"){
-
-                    input.style.display = "block";
-                    input.name = "brand";
-                    select.name = "";
-                    
-
+                    input.style.display = "block"; input.name = "brand"; select.name = "";
                 }else{
-
-                    input.style.display = "none";
-                    input.name = "";
-                    select.name = "brand";
-                    input.value = "";
+                    input.style.display = "none"; input.name = ""; select.name = "brand"; input.value = "";
                 }
             }
 
             function toggleEditOtherBrand(){
-
                 const select = document.getElementById("editBrand");
                 const input = document.getElementById("editOtherBrandInput");
-
                 if(select.value === "other"){
-
-                    input.style.display = "block";
-                    input.name = "brand";
-                    select.name = "";
-
+                    input.style.display = "block"; input.name = "brand"; select.name = "";
                 }else{
-
-                    input.style.display = "none";
-                    input.name = "";
-                    select.name = "brand";
-                    input.value = "";
-
+                    input.style.display = "none"; input.name = ""; select.name = "brand"; input.value = "";
                 }
             }
 
-
             function resetAddForm(){
-
                 const form = document.getElementById("addProductForm");
                 const select = document.getElementById("brandSelect");
                 const input = document.getElementById("otherBrandInput");
-
                 form.reset();
-
-                input.style.display = "none";
-                input.value = "";
-
-                select.name = "brand";
-                input.name = "";
-
+                input.style.display = "none"; input.value = "";
+                select.name = "brand"; input.name = "";
                 closeModal("addModal");
-
             }
 
             async function openHistoryModal(id, name) {
@@ -464,32 +442,116 @@
                 }
             }
 
-            // ระบบ Filter
+            // ==========================================
+            // ระบบ Pagination 10 Items + Real-time Filter
+            // ==========================================
             document.addEventListener('DOMContentLoaded', () => {
                 const searchInput = document.getElementById('searchInput');
                 const brandFilter = document.getElementById('brandFilter');
                 const statusFilter = document.getElementById('statusFilter');
                 const productRows = document.querySelectorAll('.product-row');
-                const visibleCountDisplay = document.getElementById('visibleCount');
+                
+                const visibleCountDisplay = document.getElementById('visibleCountDisplay');
+                const paginationControls = document.getElementById('paginationControls');
 
+                let currentPage = 1;
+                const rowsPerPage = 10; // แสดง 10 รายการต่อหน้า
+                let filteredRows = [];
+
+                // ฟังก์ชันหลักสำหรับกรองข้อมูล
                 function filterTable() {
                     const searchTerm = searchInput.value.toLowerCase();
                     const selectedBrand = brandFilter.value;
                     const selectedStatus = statusFilter.value;
-                    let visibleCount = 0;
+                    
+                    filteredRows = []; // ล้างค่าที่กรองทุกครั้งที่พิมพ์ใหม่
+
                     productRows.forEach(row => {
                         const rowSearchText = row.getAttribute('data-search');
                         const rowBrand = row.getAttribute('data-brand');
                         const rowStatus = row.getAttribute('data-status');
-                        if (rowSearchText.includes(searchTerm) && (selectedBrand === "" || rowBrand === selectedBrand) && (selectedStatus === "" || rowStatus === selectedStatus)) {
-                            row.style.display = ''; visibleCount++;
-                        } else { row.style.display = 'none'; }
+
+                        const matchesSearch = rowSearchText.includes(searchTerm);
+                        const matchesBrand = selectedBrand === "" || rowBrand === selectedBrand;
+                        const matchesStatus = selectedStatus === "" || rowStatus === selectedStatus;
+
+                        if (matchesSearch && matchesBrand && matchesStatus) {
+                            filteredRows.push(row);
+                        } else {
+                            row.style.display = 'none'; // ซ่อนตัวที่ไม่ตรงเงื่อนไข
+                        }
                     });
-                    if (visibleCountDisplay) visibleCountDisplay.textContent = visibleCount;
+
+                    // เมื่อมีการค้นหาใหม่ ให้กลับไปหน้า 1 เสมอ
+                    currentPage = 1; 
+                    renderPagination();
                 }
+
+                // ฟังก์ชันจัดการการแสดงผล 10 รายการตามหน้า
+                function renderPagination() {
+                    const totalRows = filteredRows.length;
+                    const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+
+                    // คำนวณจุดเริ่มต้นและจุดสิ้นสุดของ Array ที่จะดึงมาโชว์
+                    const start = (currentPage - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
+
+                    // สั่งโชว์แค่สินค้าที่อยู่ในช่วง 10 ชิ้นของหน้านั้น
+                    filteredRows.forEach((row, index) => {
+                        if (index >= start && index < end) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // อัปเดตข้อความ "แสดง X ถึง Y จาก Z รายการ"
+                    const displayStart = totalRows === 0 ? 0 : start + 1;
+                    const displayEnd = Math.min(end, totalRows);
+                    
+                    if (visibleCountDisplay) {
+                        visibleCountDisplay.innerHTML = `แสดง <strong>${displayStart}</strong> ถึง <strong>${displayEnd}</strong> จากทั้งหมด <strong>${totalRows}</strong> รายการ`;
+                    }
+
+                    setupPaginationUI(totalPages);
+                }
+
+                // ฟังก์ชันสร้างปุ่มตัวเลขหน้า 1, 2, 3 ...
+                function setupPaginationUI(totalPages) {
+                    if (!paginationControls) return;
+                    let html = '';
+
+                    // ปุ่มย้อนกลับ (Prev)
+                    html += `<a href="#" class="page-item ${currentPage === 1 ? 'disabled' : ''}" onclick="changePage(event, ${currentPage - 1})"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_left</span></a>`;
+
+                    // วนลูปสร้างปุ่มตัวเลข
+                    for (let i = 1; i <= totalPages; i++) {
+                        html += `<a href="#" class="page-item ${i === currentPage ? 'active' : ''}" onclick="changePage(event, ${i})">${i}</a>`;
+                    }
+
+                    // ปุ่มถัดไป (Next)
+                    html += `<a href="#" class="page-item ${currentPage === totalPages ? 'disabled' : ''}" onclick="changePage(event, ${currentPage + 1})"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_right</span></a>`;
+
+                    paginationControls.innerHTML = html;
+                }
+
+                // ฟังก์ชันเมื่อผู้ใช้กดเปลี่ยนหน้า
+                window.changePage = function(event, page) {
+                    event.preventDefault(); // กันไม่ให้หน้าเว็บเด้งขึ้นบนสุด
+                    const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+                    if (page >= 1 && page <= totalPages) {
+                        currentPage = page;
+                        renderPagination();
+                    }
+                };
+
+                // ดักจับ Event ค้นหาและ Filter
                 if(searchInput) searchInput.addEventListener('input', filterTable);
                 if(brandFilter) brandFilter.addEventListener('change', filterTable);
                 if(statusFilter) statusFilter.addEventListener('change', filterTable);
+
+                // เริ่มต้นทำงานครั้งแรกเมื่อเปิดหน้าเว็บ
+                filterTable();
             });
         </script>
 </body>
