@@ -25,12 +25,18 @@
 
 
         <!-- Filter -->
-        <div class="filter-box">
+        <form class="filter-box" method="GET" action="/history">
 
             <div class="filter-row">
+
                 <div class="filter-group">
                     <label>ช่วงวันที่</label>
-                    <input type="text" placeholder="Select dates">
+                    <input type="date" name="startDate">
+                </div>
+
+                <div class="filter-group">
+                    <label>ถึงวันที่</label>
+                    <input type="date" name="endDate">
                 </div>
 
                 <div class="filter-group">
