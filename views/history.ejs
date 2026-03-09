@@ -20,7 +20,6 @@
                 <h1>กิจกรรมก่อนหน้า</h1>
                 <p>ติดตามการเคลื่อนไหวของสินค้าในคลัง การปรับเปลี่ยนระบบ และกิจกรรมทำของพนักงาน</p>
             </div>
-            <button class="export-btn">Export CSV</button>
         </div>
 
 
@@ -99,7 +98,7 @@
         <table class="history-table">
     <thead>
         <tr>
-            <th>LOG_ID</th>
+            <th>LOG ID</th>
             <th>ACTION TYPE</th>
             <th>TIMESTAMP</th>
             <th>USER</th>
@@ -141,16 +140,31 @@
 
         <!-- Pagination -->
         <div class="pagination">
-            <div class="page-btn">Previous</div>
-            <div class="page-btn active">1</div>
-            <div class="page-btn">2</div>
-            <div class="page-btn">Next</div>
+
+            <% if(page > 1){ %>
+                <a class="page-btn" href="?page=<%= page-1 %>">Previous</a>
+            <% } %>
+
+            <% for(let i = 1; i <= totalPages; i++){ %>
+                <a 
+                class="page-btn <%= page === i ? 'active' : '' %>" 
+                href="?page=<%= i %>">
+                <%= i %>
+                </a>
+            <% } %>
+
+            <% if(page < totalPages){ %>
+                <a class="page-btn" href="?page=<%= page+1 %>">Next</a>
+            <% } %>
+
         </div>
 
     </div>
 </body>
 </html>
+
 <script>
+// Dropdown
 const dropdown = document.querySelector("#activityDropdown")
 
 if(dropdown){

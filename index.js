@@ -403,6 +403,10 @@ app.get('/history', (req, res) => {
 
     const { startDate, endDate, type, user, product } = req.query;
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
     let sql = `
     SELECT 
         log_id,
@@ -436,19 +440,35 @@ app.get('/history', (req, res) => {
         params.push(`${product.trim()}%`);
     }
 
-    sql += " ORDER BY timestamp DESC";
+    const countSql = `SELECT COUNT(*) as total FROM (${sql})`;
 
-    db.all(sql, params, (err, rows) => {
+    sql += " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
+    db.get(countSql, params.slice(0, params.length - 2), (err, countResult) => {
 
         if (err) {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
 
-        res.render('history', {
-            user: req.session.user,
-            currentPage: 'history',
-            logs: rows
+        const totalPages = Math.ceil(countResult.total / limit);
+
+        db.all(sql, params, (err, rows) => {
+
+            if (err) {
+                console.error(err.message);
+                return res.status(500).send("Database Error");
+            }
+
+            res.render('history', {
+                user: req.session.user,
+                currentPage: 'history',
+                logs: rows,
+                page: page,
+                totalPages: totalPages
+            });
+
         });
 
     });
