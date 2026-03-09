@@ -102,7 +102,14 @@
                             </td>
                             <!-- Join มาเรียบร้อยแล้ว สามารถใช้ item_id, user_name ได้ -->
                             <td> <%= order.user_name %> </td>
-                            <td> <%= order.status %> </td>
+                            <td>
+                                <select id="statusDropdown" class="form-control" <%= user.role === "staff" ? "disabled" : "" %> >
+                                    <option value="pending" <%= order.status === "รอการอนุมัติ" ? "selected" : "" %> >รอการอนุมัติ</option>
+                                    <option value="preparing" <%= order.status === "กำลังเตรียมสินค้า" ? "selected" : "" %> >กำลังเตรียมสินค้า</option>
+                                    <option value="waiting" <%= order.status === "รอการจัดส่ง" ? "selected" : "" %> >รอการจัดส่ง</option>
+                                    <option value="delivering" <%= order.status === "สินค้าออกจากโกดัง" ? "selected" : "" %> >สินค้าออกจากโกดัง</option>
+                                </select>
+                            </td>
                             <td> <%= order.order_quantity %> </td>
                             <td> <%= order.detail %> </td>
                         </tr>
