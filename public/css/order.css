@@ -16,4 +16,8 @@
     overflow-y: auto;
     height: 70vh;
     max-width: 600px;
+    /* display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; */
 }

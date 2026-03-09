@@ -49,15 +49,15 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 ('staff1', '1234', 'Somchai', 'staff')`;
             db.run(insertUsers);
 
-            //ตาราง LoginLog 
+            //ตาราง LoginLog
             db.run(`CREATE TABLE IF NOT EXISTS LoginLog (
             log_id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
-            display_name TEXT, 
+            display_name TEXT,
             status TEXT,
             ip_address TEXT,
             login_time TEXT DEFAULT (DATETIME('now', 'localtime'))
-             )`);
+            )`);
 
             // --- สร้างตาราง Inventory (เปลี่ยน icon เป็น image) ---
             db.run(`CREATE TABLE IF NOT EXISTS Inventory (
@@ -126,7 +126,6 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 FOREIGN KEY (item_id) REFERENCES Inventory(id),
                 FOREIGN KEY (user_id) REFERENCES Users(id)
                 );`);
-                
 
             // --- สร้างตาราง ActivityLog ---
             db.run(`CREATE TABLE IF NOT EXISTS ActivityLog (
@@ -136,13 +135,6 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 activity_type TEXT,
                 product_name TEXT
             )`);
-
-            const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
-                                SELECT ?, ?, ?, ?, ?
-                                WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 1)`;
-            db.run(insertOrder, [1, 1, 'Pending', 'Walk-in order', 12]);
-            db.run(`INSERT INTO Orders (item_id, user_id, status, detail, order_quantity) SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 2)`, [2, 2, 'Picking', 'Online order #1001', 14]);
-            db.run(`INSERT INTO Orders (item_id, user_id, status, detail, order_quantity) SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 3)`, [3, 1, 'Completed', 'Acoustic sale', 15]);
         });
     }
 });
@@ -504,16 +496,44 @@ app.get('/orders', (req, res) => {
         JOIN Users ON Orders.user_id = Users.id
         ORDER BY Orders.timestamp DESC`;
 
-    db.all(selectOrders, [], (err, rows) => {
-        if (err) {
+    const countStatus = `SELECT status, COUNT(order_id) AS total
+                        FROM Orders
+                        GROUP BY status
+                        ORDER BY CASE status
+                            WHEN 'รอการอนุมัติ' THEN 1
+                            WHEN 'กำลังเตรียมสินค้า' THEN 2
+                            WHEN 'รอการจัดส่ง' THEN 3
+                            WHEN 'สินค้าออกจากโกดัง' THEN 4
+                        END;`;
+    db.all(selectOrders, [], (dataErr, dataRows) => {
+        if (dataErr) {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
-        res.render('order', {
-            user: req.session.user,
-            currentPage: 'orders',
-            orders: rows
-        })
+
+        db.all(countStatus, [], (cntErr, cntRows) => {
+            if (cntErr) {
+                console.error(err.message);
+                return res.status(500).send("Database Error")
+            }
+
+            //หลังจาก query ให้มาตรวจสอบก่อน กันกรณีไม่มี status
+            const statsObject = {
+                'รอการอนุมัติ': 0,
+                'กำลังเตรียมสินค้า': 0,
+                'รอการจัดส่ง': 0,
+                'สินค้าออกจากโกดัง': 0
+            };
+            cntRows.forEach(row => {
+                statsObject[row.status] = row.total; //เพื่อบอกว่าถ้าเจอ row ไหนก็ใส่ค่าให้ row นั้น ถ้าไม่เจอจะกลายเป็น 0 (default) เอง
+            })
+            res.render('order', {
+                user: req.session.user,
+                currentPage: 'orders',
+                orders: dataRows,
+                stats: statsObject
+            });
+        });
     })
 });
 

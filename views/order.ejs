@@ -36,22 +36,29 @@
             <div class="stat-card">
                 <div class="stat-title">รอการอนุมัติ</div>
                 <div class="stat-info">
-                    <h2>12</h2>
+                    <h2><%= stats["รอการอนุมัติ"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--info);">pending_actions</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">กำลังจัดส่ง</div>
+                <div class="stat-title">กำลังเตรียมสินค้า</div>
                 <div class="stat-info">
-                    <h2>5</h2>
+                    <h2><%= stats["กำลังเตรียมสินค้า"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--warning);">shopping_cart</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">เสร็จสิ้น</div>
+                <div class="stat-title">รอการจัดส่ง</div>
                 <div class="stat-info">
-                    <h2>8</h2>
+                    <h2><%= stats["รอการจัดส่ง"] %></h2>
                     <span class="material-symbols-outlined" style="font-size: 24px; color: var(--success);">local_shipping</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">สินค้าออกจากโกดัง</div>
+                <div class="stat-info">
+                    <h2><%= stats["สินค้าออกจากโกดัง"] %></h2>
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: var(--warning);">delivery_truck_speed</span>
                 </div>
             </div>
         </section>
