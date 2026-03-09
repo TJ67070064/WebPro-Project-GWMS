@@ -141,23 +141,23 @@
         <!-- Pagination -->
         <div class="pagination">
 
-            <% if(page > 1){ %>
-                <a class="page-btn" href="?page=<%= page-1 %>">Previous</a>
-            <% } %>
+    <% if(page > 1){ %>
+        <a class="page-btn" href="?page=<%= page-1 %>">Previous</a>
+    <% } %>
 
-            <% for(let i = 1; i <= totalPages; i++){ %>
-                <a 
-                class="page-btn <%= page === i ? 'active' : '' %>" 
-                href="?page=<%= i %>">
-                <%= i %>
-                </a>
-            <% } %>
+    <% for(let i = 1; i <= totalPages; i++){ %>
+        <a 
+        class="page-btn <%= page === i ? 'active' : '' %>" 
+        href="?page=<%= i %>">
+        <%= i %>
+        </a>
+    <% } %>
 
-            <% if(page < totalPages){ %>
-                <a class="page-btn" href="?page=<%= page+1 %>">Next</a>
-            <% } %>
+    <% if(page < totalPages){ %>
+        <a class="page-btn" href="?page=<%= page+1 %>">Next</a>
+    <% } %>
 
-        </div>
+</div>
 
     </div>
 </body>
