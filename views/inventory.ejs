@@ -176,15 +176,36 @@
                     <h3 style="margin: 0; color: #111;">เพิ่มสินค้าใหม่</h3>
                     <button type="button" onclick="closeModal('addModal')" style="background: none; border: none; cursor: pointer; color: #888;"><span class="material-symbols-outlined">close</span></button>
                 </div>
-                <form action="/inventory/add" method="POST" style="display: flex; flex-direction: column;">
+                <form id="addProductForm" action="/inventory/add" method="POST" style="display: flex; flex-direction: column;">
                     <div class="form-grid">
                         <div><label class="modal-label">ชื่อสินค้า</label><input type="text" name="name" required class="form-control modal-input" placeholder="เช่น Stratocaster"></div>
                         <div><label class="modal-label">รหัสสินค้า (SKU)</label><input type="text" name="sku" required class="form-control modal-input" placeholder="เช่น FND-001"></div>
                     </div>
                     <div class="form-grid">
-                        <div><label class="modal-label">แบรนด์</label><input type="text" name="brand" required class="form-control modal-input"></div>
+                    <div>
+                        <label class="modal-label">แบรนด์</label>
+
+                        <select id="brandSelect" name="brand" class="form-control modal-input" onchange="toggleOtherBrand()">
+                            <option value="Fender">Fender</option>
+                            <option value="Gibson">Gibson</option>
+                            <option value="Ibanez">Ibanez</option>
+                            <option value="Martin">Martin</option>
+                            <option value="Ernie Ball">Ernie Ball</option>
+                            <option value="other">อื่นๆ</option>
+                        </select>
+
+                        <input
+                        type="text"
+                        id="otherBrandInput"
+                        class="form-control modal-input"
+                        placeholder="พิมพ์ชื่อแบรนด์"
+                        style="display:none; margin-top:8px;"
+                        >
+                    </div>
+
                         <div><label class="modal-label">หมวดหมู่</label><select name="category" required class="form-control modal-input"><option value="Electric">Electric</option><option value="Acoustic">Acoustic</option><option value="Accessory">Accessory</option></select></div>
                     </div>
+
                     <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
                         <div><label class="modal-label">โซน/ตำแหน่ง</label><input type="text" name="zone" required class="form-control modal-input"></div>
                         <div><label class="modal-label">จำนวนสต็อก</label><input type="number" name="quantity" required min="0" value="0" class="form-control modal-input"></div>
@@ -193,7 +214,7 @@
                     <div style="margin-bottom: 20px;"><label class="modal-label">ลิงก์รูปภาพ (URL)</label><input type="text" name="image" class="form-control modal-input"></div>
                     <div style="display: flex; gap: 10px;">
                         <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">บันทึกสินค้า</button>
-                        <button type="button" class="btn-outline" onclick="closeModal('addModal')" style="flex: 1; justify-content: center;">ยกเลิก</button>
+                        <button type="button" class="btn-outline" onclick="resetAddForm()" style="flex: 1; justify-content: center;">ยกเลิก</button>
                     </div>
                 </form>
             </div>
@@ -211,7 +232,25 @@
                         <div><label class="modal-label">รหัสสินค้า (SKU)</label><input type="text" id="editSku" name="sku" required class="form-control modal-input" readonly style="background: rgba(0,0,0,0.05); cursor: not-allowed;"></div>
                     </div>
                     <div class="form-grid">
-                        <div><label class="modal-label">แบรนด์</label><input type="text" id="editBrand" name="brand" required class="form-control modal-input"></div>
+                        <div>
+                            <label class="modal-label">แบรนด์</label>
+                                <select id="editBrand" name="brand" class="form-control modal-input" onchange="toggleEditOtherBrand()">
+                                    <option value="Fender">Fender</option>
+                                    <option value="Gibson">Gibson</option>
+                                    <option value="Ibanez">Ibanez</option>
+                                    <option value="Martin">Martin</option>
+                                    <option value="Ernie Ball">Ernie Ball</option>
+                                    <option value="other">อื่นๆ</option>
+                                    </select>
+
+                                    <input
+                                    type="text"
+                                    id="editOtherBrandInput"
+                                    class="form-control modal-input"
+                                    placeholder="พิมพ์ชื่อแบรนด์"
+                                    style="display:none; margin-top:8px;"
+                                    >
+                        </div>
                         <div><label class="modal-label">หมวดหมู่</label><select id="editCategory" name="category" required class="form-control modal-input"><option value="Electric">Electric</option><option value="Acoustic">Acoustic</option><option value="Accessory">Accessory</option></select></div>
                     </div>
                     <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
@@ -281,21 +320,115 @@
 
             function openDeleteModal(id, name) {
                 document.getElementById('deleteItemName').textContent = name;
+                //เพิ่ม action ตรงนี้
                 document.getElementById('deleteProductForm').action = '/inventory/delete/' + id;
                 openModal('deleteConfirmModal');
             }
 
             function openEditProductModal(btn) {
+
                 document.getElementById('editProductForm').action = '/inventory/edit/' + btn.getAttribute('data-id');
+
                 document.getElementById('editName').value = btn.getAttribute('data-name');
                 document.getElementById('editSku').value = btn.getAttribute('data-sku');
-                document.getElementById('editBrand').value = btn.getAttribute('data-brand');
+
+                const brand = btn.getAttribute('data-brand');
+                const brandSelect = document.getElementById('editBrand');
+
+                // ตรวจbrandในdropdown
+                let exists = false;
+                for (let option of brandSelect.options) {
+                    if (option.value === brand) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                // ถ้าไม่มี เพิ่ม option
+                if (!exists) {
+                    const newOption = document.createElement("option");
+                    newOption.value = brand;
+                    newOption.text = brand;
+                    
+                    const otherOption = brandSelect.querySelector('option[value="other"]');
+
+                    if (otherOption) {
+                        brandSelect.insertBefore(newOption, otherOption);
+                    } else {
+                        brandSelect.appendChild(newOption);
+                    }
+                }
+
+                brandSelect.value = brand;
+
                 document.getElementById('editCategory').value = btn.getAttribute('data-category');
                 document.getElementById('editZone').value = btn.getAttribute('data-zone');
                 document.getElementById('editQuantity').value = btn.getAttribute('data-quantity');
                 document.getElementById('editDetails').value = btn.getAttribute('data-details');
                 document.getElementById('editImage').value = btn.getAttribute('data-image');
+
                 openModal('editModal');
+            }
+
+            function toggleOtherBrand(){
+
+                const select = document.getElementById("brandSelect");
+                const input = document.getElementById("otherBrandInput");
+
+                if(select.value === "other"){
+
+                    input.style.display = "block";
+                    input.name = "brand";
+                    select.name = "";
+                    
+
+                }else{
+
+                    input.style.display = "none";
+                    input.name = "";
+                    select.name = "brand";
+                    input.value = "";
+                }
+            }
+
+            function toggleEditOtherBrand(){
+
+                const select = document.getElementById("editBrand");
+                const input = document.getElementById("editOtherBrandInput");
+
+                if(select.value === "other"){
+
+                    input.style.display = "block";
+                    input.name = "brand";
+                    select.name = "";
+
+                }else{
+
+                    input.style.display = "none";
+                    input.name = "";
+                    select.name = "brand";
+                    input.value = "";
+
+                }
+            }
+
+
+            function resetAddForm(){
+
+                const form = document.getElementById("addProductForm");
+                const select = document.getElementById("brandSelect");
+                const input = document.getElementById("otherBrandInput");
+
+                form.reset();
+
+                input.style.display = "none";
+                input.value = "";
+
+                select.name = "brand";
+                input.name = "";
+
+                closeModal("addModal");
+
             }
 
             async function openHistoryModal(id, name) {

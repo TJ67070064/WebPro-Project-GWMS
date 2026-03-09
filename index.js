@@ -49,6 +49,16 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 ('staff1', '1234', 'Somchai', 'staff')`;
             db.run(insertUsers);
 
+            //ตาราง LoginLog 
+            db.run(`CREATE TABLE IF NOT EXISTS LoginLog (
+            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            display_name TEXT, 
+            status TEXT,
+            ip_address TEXT,
+            login_time TEXT DEFAULT (DATETIME('now', 'localtime'))
+             )`);
+
             // --- สร้างตาราง Inventory (เปลี่ยน icon เป็น image) ---
             db.run(`CREATE TABLE IF NOT EXISTS Inventory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,6 +128,15 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 );`);
                 
 
+            // --- สร้างตาราง ActivityLog ---
+            db.run(`CREATE TABLE IF NOT EXISTS ActivityLog (
+                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                timestamp TEXT DEFAULT (DATETIME('now','localtime')),
+                activity_type TEXT,
+                product_name TEXT
+            )`);
+
             const insertOrder = `INSERT INTO Orders (item_id, user_id, status, detail, order_quantity)
                                 SELECT ?, ?, ?, ?, ?
                                 WHERE NOT EXISTS (SELECT 1 FROM Orders WHERE order_id = 1)`;
@@ -127,6 +146,23 @@ const db = new sqlite3.Database('./database.db', (err) => {
         });
     }
 });
+// ==========================================
+// Activity Log Function
+// ==========================================
+
+function logActivity(username, activity, product_name) {
+
+    const sql = `
+    INSERT INTO ActivityLog (username, activity_type, product_name)
+    VALUES (?, ?, ?)
+    `;
+
+    db.run(sql, [username, activity, product_name], (err) => {
+        if (err) {
+            console.error("Log error:", err.message);
+        }
+    });
+}
 
 // ==========================================
 // 3. ระบบ Authentication (Login / Logout)
@@ -137,6 +173,11 @@ app.get('/', (req, res) => {
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
+    let ip_address = req.ip || req.socket.remoteAddress || 'Unknown IP';
+
+    if (ip_address === '::1' || ip_address === '::ffff:127.0.0.1') {
+    ip_address = '127.0.0.1 (Localhost)';
+    }
 
     const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
     db.get(sql, [username, password], (err, row) => {
@@ -146,10 +187,15 @@ app.post('/login', (req, res) => {
         }
 
         if (row) {
+            // ล็อกอินสำเร็จ -> บันทึก Log สถานะ Success
+            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
+                   [username, row.name, 'Success', ip_address]);
+
             req.session.user = {
                 id: row.id,
                 name: row.name,
-                role: row.role
+                role: row.role,
+                username: row.username
             };
             
             // แยกเส้นทางเข้าหน้าเว็บตาม Role
@@ -159,19 +205,44 @@ app.post('/login', (req, res) => {
                 res.redirect('/home'); // Admin กับ Manager ไปหน้า Dashboard
             }
         } else {
+            // ล็อกอินไม่สำเร็จ -> บันทึก Log สถานะ Failed (ชื่อผู้ใช้เป็น Unknown)
+            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
+                   [username, 'Unknown', 'Failed', ip_address]);
+
             res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง' });
         }
     });
 });
 
 app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+    if (req.session.user) {
+        let ip_address = req.ip || req.socket.remoteAddress || 'Unknown IP';
+        if (ip_address === '::1' || ip_address === '::ffff:127.0.0.1') {
+            ip_address = '127.0.0.1 (Localhost)';
+        }
+
+        const username = req.session.user.username || 'Unknown';
+        const displayName = req.session.user.name || 'Unknown';
+
+        db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
+            [username, displayName, 'Logout', ip_address], 
+            (err) => {
+                if (err) console.error("Error logging logout:", err.message);
+    
+                req.session.destroy();
+                res.redirect('/');
+            }
+        );
+    } else {
+        req.session.destroy();
+        res.redirect('/');
+    }
 });
 
 // ==========================================
 // 4. หน้าหลัก (Home & Inventory)
 // ==========================================
+
 app.get('/home', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
@@ -191,28 +262,30 @@ app.get('/home', (req, res) => {
 
     db.get(sqlStats, [], (err, stats) => {
         if (err) {
-            console.error(err.message);
+            console.error("Error fetching stats:", err.message);
             return res.status(500).send("Database Error");
         }
 
-        // ส่งตัวแปรทั้งหมดไปให้ home.ejs
-        res.render('home', {
-            user: req.session.user,
-            currentPage: 'home',
-            totalStock: stats.totalStock || 0,
-            lowStock: stats.lowStock || 0,
-            pendingOrders: stats.pendingOrders || 0,
-            overStock: stats.overStock || 0
-        });
-    });
-});
+        // ดึงประวัติการเข้าสู่ระบบ 5 รายการล่าสุด
+        const sqlLogs = `SELECT * FROM LoginLog ORDER BY login_time DESC LIMIT 10`;
 
-app.get('/history', (req, res) => {
-    if (!req.session.user) return res.redirect('/');
-    
-    res.render('history', { 
-        user: req.session.user,
-        currentPage: 'history' 
+        db.all(sqlLogs, [], (err, logs) => {
+            if (err) {
+                console.error("Error fetching login logs:", err.message);
+                return res.status(500).send("Database Error");
+            }
+
+            // ส่งตัวแปรทั้งหมดไปให้ home.ejs
+            res.render('home', {
+                user: req.session.user,
+                currentPage: 'home',
+                totalStock: stats.totalStock || 0,
+                lowStock: stats.lowStock || 0,
+                pendingOrders: stats.pendingOrders || 0,
+                overStock: stats.overStock || 0,
+                loginLogs: logs // ตัวแปรสำหรับแสดงในตาราง LoginLog
+            });
+        });
     });
 });
 
@@ -234,12 +307,13 @@ app.get('/inventory', (req, res) => {
     });
 });
 
+//ADD
 // Route สำหรับรับข้อมูลเพิ่มสินค้าใหม่ (รองรับรูปภาพ)
 app.post('/inventory/add', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
     const { name, details, brand, category, sku, zone, quantity, image } = req.body;
-    
+
     // ตั้งค่ารูปภาพ Default ในกรณีที่ไม่ได้ใส่ลิงก์มา
     const defaultImage = 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop';
     const finalImage = image ? image : defaultImage;
@@ -252,6 +326,10 @@ app.post('/inventory/add', (req, res) => {
             console.error('Error adding product:', err.message);
             return res.status(500).send("Error adding product. SKU might already exist.");
         }
+
+        //keeplog
+        logActivity(req.session.user.name, "ADD_PRODUCT", name);
+
         res.redirect('/inventory');
     });
 });
@@ -262,7 +340,7 @@ app.post('/inventory/edit/:id', (req, res) => {
 
     const productId = req.params.id;
     const { name, details, brand, category, zone, quantity, image } = req.body;
-    
+
     // ตั้งค่ารูปภาพ Default ในกรณีที่ลบลิงก์ออกจนว่างเปล่า
     const defaultImage = 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop';
     const finalImage = image ? image : defaultImage;
@@ -277,13 +355,19 @@ app.post('/inventory/edit/:id', (req, res) => {
             console.error('Error updating product:', err.message);
             return res.status(500).send("Error updating product.");
         }
+
+        //keeplog
+        logActivity(req.session.user.name, "EDIT_PRODUCT", name);
         res.redirect('/inventory'); // อัปเดตเสร็จให้กลับไปหน้าคลังสินค้า
     });
 });
 
+//DELETE
 // Route สำหรับลบสินค้า (Delete Product)
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
+    
+    // const { name, details, brand, category, zone, quantity, image } = req.body;
 
     // ป้องกัน Staff ลบสินค้า
     if (req.session.user.role === 'staff') {
@@ -292,16 +376,61 @@ app.post('/inventory/delete/:id', (req, res) => {
 
     const productId = req.params.id;
 
-    // คำสั่ง SQL ลบข้อมูลออกจากตาราง Inventory
-    const sql = `DELETE FROM Inventory WHERE id = ?`;
-
-    db.run(sql, productId, function (err) {
+    const selectId = `SELECT name FROM Inventory WHERE id = ?;`;
+    db.get(selectId, [productId], (err, row) => {
         if (err) {
-            console.error('Error deleting product:', err.message);
-            return res.status(500).send("Error deleting product.");
+            console.error("Error fetching product:", err.message);
+            return res.status(500).send("Database error");
         }
-        res.redirect('/inventory'); 
+
+        const productName = row.name;
+        const deleteProduct = `DELETE FROM Inventory WHERE id = ?`;
+        db.run(deleteProduct, productId, (err) => {
+            if (err) {
+                console.error('Error deleting product:', err.message);
+                return res.status(500).send("Error deleting product.");
+            }
+
+            //Keep Log by calling logActivity() function
+            logActivity(req.session.user.name, "DELETE_PRODUCT", productName);
+            res.redirect('/inventory');
+            });
+        });
+});
+
+// ==========================================
+// History(Activity log)
+// ==========================================
+app.get('/history', (req, res) => {
+
+    if (!req.session.user) return res.redirect('/');
+
+    const sql = `
+    SELECT 
+        log_id,
+        activity_type,
+        timestamp,
+        username,
+        product_name
+    FROM ActivityLog
+    ORDER BY timestamp DESC
+    `;
+
+    db.all(sql, [], (err, rows) => {
+
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Database Error");
+        }
+
+        res.render('history', {
+            user: req.session.user,
+            currentPage: 'history',
+            logs: rows
+        });
+
     });
+
 });
 
 // ==========================================
