@@ -41,12 +41,34 @@
 
                 <div class="filter-group">
                     <label>ประเภทของกิจกรรม</label>
-                    <select name="type">
-                        <option value="">ทั้งหมด</option>
-                        <option value="ADD_PRODUCT">เพิ่ม</option>
-                        <option value="DELETE_PRODUCT">ลบ</option>
-                        <option value="EDIT_PRODUCT">แก้ไข</option>
-                    </select>
+                    <div class="dropdown" id="activityDropdown">
+                        <div class="dropdown-selected">
+                            ทั้งหมด
+                        </div>
+
+                        <div class="dropdown-menu">
+
+                            <div class="dropdown-item" data-value="">
+                                ทั้งหมด
+                            </div>
+
+                            <div class="dropdown-item" data-value="ADD_PRODUCT">
+                                เพิ่ม
+                            </div>
+
+                            <div class="dropdown-item" data-value="DELETE_PRODUCT">
+                                ลบ
+                            </div>
+
+                            <div class="dropdown-item" data-value="EDIT_PRODUCT">
+                                แก้ไข
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" name="type" value="">
+
+                    </div>
                 </div>
             
                 <div class="filter-group">
@@ -128,3 +150,39 @@
     </div>
 </body>
 </html>
+<script>
+const dropdown = document.querySelector("#activityDropdown")
+
+if(dropdown){
+
+const selected = dropdown.querySelector(".dropdown-selected")
+const items = dropdown.querySelectorAll(".dropdown-item")
+const input = dropdown.querySelector("input")
+
+selected.addEventListener("click", () => {
+	dropdown.classList.toggle("open")
+})
+
+items.forEach(item => {
+
+	item.addEventListener("click", () => {
+
+		selected.textContent = item.textContent
+		input.value = item.dataset.value
+
+		dropdown.classList.remove("open")
+
+	})
+
+})
+
+document.addEventListener("click", e => {
+
+	if(!dropdown.contains(e.target)){
+		dropdown.classList.remove("open")
+	}
+
+})
+
+}
+</script>

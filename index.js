@@ -436,11 +436,6 @@ app.get('/history', (req, res) => {
         params.push(`${product.trim()}%`);
     }
 
-    if (product) {
-        sql += " AND product_name LIKE ?";
-        params.push(`${product}%`);
-    }
-
     sql += " ORDER BY timestamp DESC";
 
     db.all(sql, params, (err, rows) => {
