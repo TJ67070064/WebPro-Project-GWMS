@@ -401,7 +401,7 @@ app.get('/history', (req, res) => {
 
     if (!req.session.user) return res.redirect('/');
 
-    const { startDate, endDate, type, user } = req.query;
+    const { startDate, endDate, type, user, product } = req.query;
 
     let sql = `
     SELECT 
@@ -431,9 +431,14 @@ app.get('/history', (req, res) => {
         params.push(startDate);
     }
 
-    if (endDate) {
-        sql += " AND DATE(timestamp) <= ?";
-        params.push(endDate);
+    if (product) {
+        sql += " AND LOWER(product_name) LIKE LOWER(?)";
+        params.push(`${product.trim()}%`);
+    }
+
+    if (product) {
+        sql += " AND product_name LIKE ?";
+        params.push(`${product}%`);
     }
 
     sql += " ORDER BY timestamp DESC";

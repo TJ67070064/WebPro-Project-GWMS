@@ -48,6 +48,27 @@
     flex-wrap: wrap;
 }
 
+/* row2 */
+
+.filter-row + .filter-row{
+    margin-top: 15px;
+}
+
+/* label spacing */
+
+.filter-group label{
+    display:block;
+    margin-bottom:10px;
+    font-size:13px;
+    color:#a1a1a1;
+}
+
+/* input spacing */
+
+.filter-group input{
+    margin-top:2px;
+}
+
 .filter-group {
     flex: 1;
     min-width: 220px;
@@ -68,6 +89,10 @@
     border: 1px solid rgba(255,255,255,0.1);
     background: rgba(0,0,0,0.3);
     color: white;
+}
+
+.filter-group input[name="product"]{
+    max-width: 450px;
 }
 
 .filter-btn {
