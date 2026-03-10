@@ -1,7 +1,4 @@
-/* =========================================
-   2. Layout Controllers (ตัวคุมโครงสร้างหน้า)
-   ========================================= */
-/* ใช้กับ <body> ในหน้า Login */
+
 body.login-page {
     display: flex;
     justify-content: center;
