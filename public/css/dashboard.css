@@ -2,10 +2,10 @@
 /*Layout Controllers (ตัวคุมโครงสร้างหน้า)*/
 /* ใช้กับ <body> ในหน้า Dashboard */
 body.dashboard-page {
-    display: block; /* ไม่จัดกลางจอ เพื่อให้ Navbar อยู่ด้านบนสุด */
+    display: block; 
 }
 
-/* Search & Profile */
+
 .search-box {
     position: relative;
 }

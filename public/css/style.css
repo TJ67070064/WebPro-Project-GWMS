@@ -141,12 +141,12 @@ body {
     z-index: 2000;
 }
 
-/* เปลี่ยน display หลังจาก overlay (ให้แสดงผล) */
+
 .modal-overlay.active {
     display: flex;
 }
 
-/* modal-box คือเนื้อหาตรงกลางของ overlay จริง ๆ */
+
 .modal-box {
     background: var(--panel-bg);
     padding: 30px;
@@ -206,7 +206,7 @@ select.form-control {
     background-size: 10px auto;
 }
 
-/* Table Cells Data */
+
 .product-cell {
     display: flex;
     align-items: center;
@@ -290,7 +290,7 @@ select.form-control {
     box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
 }
 
-/* Buttons inside Table */
+
 .btn-icon {
     background: transparent;
     border: none;
@@ -314,7 +314,7 @@ select.form-control {
     color: #1a1a1b;
 }
 
-/* Pagination */
+
 .pagination-wrapper {
     display: flex;
     justify-content: space-between;
@@ -358,7 +358,7 @@ select.form-control {
     border-color: var(--primary);
 }
 
-/* Footer Dashboard */
+
 .dash-footer {
     display: flex;
     justify-content: space-between;
@@ -556,7 +556,7 @@ select.form-control {
 
 .btn-action span {
     font-size: 18px;
-    /* ปรับขนาดไอคอนให้พอดี */
+    
 }
 
 .btn-action:hover {
@@ -578,7 +578,6 @@ select.form-control {
 
 /*10. Modal Enhancements (Animation & Footer)*/
 .modal-box {
-    /* เพิ่ม Animation ให้ Modal */
     transform: scale(0.95) translateY(10px);
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
