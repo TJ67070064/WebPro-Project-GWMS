@@ -22,7 +22,7 @@
             <div class="search-filter">
                 <div class="input-wrapper">
                     <span class="material-symbols-outlined icon">search</span>
-                    <input type="text" class="form-control" placeholder="ค้นหา...">
+                    <input id="searchInput" type="text" class="form-control" placeholder="ค้นหาสินค้าด้วยชื่อ...">
                 </div>
                 <div>
                     <button onclick="openShowInventory('showInventoryModal')" class="btn-primary" style="width: auto; padding: 10px 20px; margin-top: 0;">
@@ -78,7 +78,7 @@
                 </thead>
                 <tbody>
                     <% orders.forEach(order => { %>
-                        <tr>
+                        <tr class="product-row" data-search="<%= order.product_name %>">
                             <td>
                                 <div class="product-cell">
                                     <div class="icon-box" style="padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
@@ -123,6 +123,14 @@
                     <% }) %>
                 </tbody>
             </table>
+            <div class="pagination-wrapper">
+                <!-- description แสดง records ทั้งหมดทางซ้าย -->
+                <div class="pagination-info" id="visibleCountDisplay">
+                    กำลังโหลดข้อมูล...
+                </div>
+                <!-- ปุ่ม pagination ทางขวา -->
+                <div class="pagination" id="paginationControls"></div>
+            </div>
         </section>
     </main>
 
@@ -273,6 +281,86 @@ async function updateStatus(orderId, status) {
                 closeModal(event.target.id);
             }
         }
+
+        // ระบบ Pagination 10 Items + Real-time Filter
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const productRows = document.querySelectorAll('.product-row');
+            const visibleCountDisplay = document.getElementById('visibleCountDisplay');
+            const paginationControls = document.getElementById('paginationControls');
+
+            let currentPage = 1;
+            const rowsPerPage = 10;
+            let filteredRows = [];
+
+            function filterTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+                filteredRows = [];
+
+                productRows.forEach(row => {
+                    const rowSearchText = row.getAttribute('data-search').toLowerCase();
+
+                    const matchesSearch = rowSearchText.includes(searchTerm);
+
+                    if (matchesSearch) {
+                        filteredRows.push(row);
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                currentPage = 1;
+                renderPagination();
+            }
+
+            function renderPagination() {
+                const totalRows = filteredRows.length;
+                const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+
+                filteredRows.forEach((row, index) => {
+                    if (index >= start && index < end) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                const displayStart = totalRows === 0 ? 0 : start + 1;
+                const displayEnd = Math.min(end, totalRows);
+
+                if (visibleCountDisplay) {
+                    visibleCountDisplay.innerHTML = `แสดง <strong>${displayStart}</strong> ถึง <strong>${displayEnd}</strong> จากทั้งหมด <strong>${totalRows}</strong> รายการ`;
+                }
+
+                setupPaginationUI(totalPages);
+            }
+
+            function setupPaginationUI(totalPages) {
+                if (!paginationControls) return;
+                let html = '';
+                html += `<a href="#" class="page-item ${currentPage === 1 ? 'disabled' : ''}" onclick="changePage(event, ${currentPage - 1})"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_left</span></a>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    html += `<a href="#" class="page-item ${i === currentPage ? 'active' : ''}" onclick="changePage(event, ${i})">${i}</a>`;
+                }
+                html += `<a href="#" class="page-item ${currentPage === totalPages ? 'disabled' : ''}" onclick="changePage(event, ${currentPage + 1})"><span class="material-symbols-outlined" style="font-size: 16px; transform: translateY(2px);">chevron_right</span></a>`;
+                paginationControls.innerHTML = html;
+            }
+
+            window.changePage = function(event, page) {
+                event.preventDefault();
+                const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+                if (page >= 1 && page <= totalPages) {
+                    currentPage = page;
+                    renderPagination();
+                }
+            };
+
+            if(searchInput) searchInput.addEventListener('input', filterTable);
+            filterTable();
+        });
     </script>
     <% if (errMsg) { %>
         <script>
