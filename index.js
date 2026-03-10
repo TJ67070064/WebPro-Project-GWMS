@@ -2,7 +2,6 @@ const express = require('express');
 const session = require('express-session');
 const { stat } = require('fs');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 
@@ -12,6 +11,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(express.json()); //แปลง JSON ที่ Client ส่งมาให้เป็น JavaScript Object
 app.use(express.urlencoded({ extended: true }));
 
 // ตั้งค่า Session
@@ -24,118 +24,14 @@ app.use(session({
 // ==========================================
 // SECTION 2. DB & เชื่อมต่อและตั้งค่าฐานข้อมูล SQLite
 // ==========================================
+const sqlite3 = require('sqlite3').verbose();
+
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
         console.error('Error opening database', err.message);
     } else {
         console.log('Connected to the database.db SQLite database.');
-
-        db.serialize(() => {
-            db.run("PRAGMA foreign_keys = ON"); //Enable foreign keys
-
-            // --- สร้างตาราง users ---
-            db.run(`CREATE TABLE IF NOT EXISTS Users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE,
-                password TEXT,
-                name TEXT,
-                role TEXT
-            )`);
-
-            // ใส่ข้อมูล User จำลอง
-            const insertUsers = `INSERT OR IGNORE INTO Users (username, password, name, role) VALUES
-                ('admin', '1234', 'TJ', 'admin'),
-                ('manager', '1234', 'Somyod', 'manager'),
-                ('staff1', '1234', 'Somchai', 'staff')`;
-            db.run(insertUsers);
-
-            //ตาราง LoginLog
-            db.run(`CREATE TABLE IF NOT EXISTS LoginLog (
-            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            display_name TEXT,
-            status TEXT,
-            ip_address TEXT,
-            login_time TEXT DEFAULT (DATETIME('now', 'localtime'))
-            )`);
-
-            // --- สร้างตาราง Inventory (เปลี่ยน icon เป็น image) ---
-            db.run(`CREATE TABLE IF NOT EXISTS Inventory (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                details TEXT,
-                brand TEXT,
-                category TEXT,
-                sku TEXT UNIQUE,
-                zone TEXT,
-                quantity INTEGER,
-                image TEXT
-            )`);
-
-            // ใส่ข้อมูลสินค้าจำลอง (พร้อมรูปตัวอย่าง)
-            const insertInventory = `INSERT OR IGNORE INTO Inventory (name, details, brand, category, sku, zone, quantity, image) VALUES 
-                ('Stratocaster Pro II', 'Dark Night', 'Fender', 'Electric', 'FND-STR-001', 'Zone A / Rack 12', 12, 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?q=80&w=200&auto=format&fit=crop'),
-                ('Les Paul Standard', 'Heritage Cherry Sunburst', 'Gibson', 'Electric', 'GIB-LP-050', 'Zone A / Rack 08', 2, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
-                ('D-28 Acoustic', 'Natural', 'Martin', 'Acoustic', 'MAR-D28-002', 'Zone B / Shelf 02', 5, 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=200&auto=format&fit=crop'),
-                ('RG550 Genesis', 'Desert Sun Yellow', 'Ibanez', 'Electric', 'IBZ-RG-112', 'Zone A / Rack 22', 0, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
-                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'https://images.unsplash.com/photo-1621255799738-f860fb41f103?q=80&w=200&auto=format&fit=crop'),
-                ('Stratocaster Pro II', 'Dark Night', 'Fender', 'Electric', 'FND-STR-001', 'Zone A / Rack 12', 12, 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?q=80&w=200&auto=format&fit=crop'),
-                ('Les Paul Standard', 'Heritage Cherry Sunburst', 'Gibson', 'Electric', 'GIB-LP-050', 'Zone A / Rack 08', 2, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
-                ('D-28 Acoustic', 'Natural', 'Martin', 'Acoustic', 'MAR-D28-002', 'Zone B / Shelf 02', 5, 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?q=80&w=200&auto=format&fit=crop'),
-                ('RG550 Genesis', 'Desert Sun Yellow', 'Ibanez', 'Electric', 'IBZ-RG-112', 'Zone A / Rack 22', 0, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
-                ('Pro Cable 10ft', 'Braided Black', 'Ernie Ball', 'Accessory', 'ACC-CBL-010', 'Zone D / Bin 05', 145, 'https://images.unsplash.com/photo-1621255799738-f860fb41f103?q=80&w=200&auto=format&fit=crop'),
-
-                ('Telecaster Player', 'Butterscotch Blonde', 'Fender', 'Electric', 'FND-TEL-021', 'Zone A / Rack 03', 7, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
-                ('SG Standard', 'Cherry Red', 'Gibson', 'Electric', 'GIB-SG-011', 'Zone A / Rack 09', 3, 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=200&auto=format&fit=crop'),
-                ('Jazzmaster Classic', 'Olympic White', 'Fender', 'Electric', 'FND-JZM-030', 'Zone A / Rack 14', 4, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
-                ('Jaguar Player', 'Surf Green', 'Fender', 'Electric', 'FND-JAG-008', 'Zone A / Rack 15', 6, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
-                ('Boss DS-1', 'Orange', 'Boss', 'Pedal', 'PED-BOS-001', 'Zone C / Bin 01', 22, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
-                ('Tube Screamer', 'Green', 'Ibanez', 'Pedal', 'PED-IBZ-002', 'Zone C / Bin 02', 18, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
-                ('Big Muff Pi', 'Black', 'Electro-Harmonix', 'Pedal', 'PED-EHX-003', 'Zone C / Bin 03', 11, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
-                ('DD-7 Digital Delay', 'Blue', 'Boss', 'Pedal', 'PED-BOS-004', 'Zone C / Bin 04', 9, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
-                ('Holy Grail Reverb', 'Silver', 'EHX', 'Pedal', 'PED-EHX-005', 'Zone C / Bin 05', 7, 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?q=80&w=200&auto=format&fit=crop'),
-
-                ('Guitar Picks Pack', 'Multi Color', 'Dunlop', 'Accessory', 'ACC-PCK-001', 'Zone D / Bin 02', 300, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
-                ('Capo Standard', 'Black', 'Kyser', 'Accessory', 'ACC-CAP-002', 'Zone D / Bin 03', 54, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
-                ('Strap Leather', 'Brown', 'Fender', 'Accessory', 'ACC-STP-003', 'Zone D / Bin 04', 33, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
-                ('Clip Tuner', 'Black', 'Snark', 'Accessory', 'ACC-TUN-004', 'Zone D / Bin 06', 61, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
-                ('Guitar Stand', 'Metal Black', 'Hercules', 'Accessory', 'ACC-STD-005', 'Zone D / Bin 07', 28, 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=200&auto=format&fit=crop'),
-
-                ('Katana 50', 'Black', 'Boss', 'Amplifier', 'AMP-BOS-050', 'Zone E / Shelf 01', 10, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
-                ('Blues Junior', 'Tweed', 'Fender', 'Amplifier', 'AMP-FND-020', 'Zone E / Shelf 02', 5, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
-                ('AC15', 'Black', 'Vox', 'Amplifier', 'AMP-VOX-015', 'Zone E / Shelf 03', 4, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
-                ('DSL40', 'Black', 'Marshall', 'Amplifier', 'AMP-MAR-040', 'Zone E / Shelf 04', 3, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
-                ('Spark 40', 'Black', 'Positive Grid', 'Amplifier', 'AMP-SPK-040', 'Zone E / Shelf 05', 6, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=200&auto=format&fit=crop'),
-
-                ('Bass Precision', 'Sunburst', 'Fender', 'Bass', 'BAS-FND-001', 'Zone F / Rack 01', 3, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
-                ('Jazz Bass', 'Black', 'Fender', 'Bass', 'BAS-FND-002', 'Zone F / Rack 02', 2, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
-                ('SR300', 'Weathered Black', 'Ibanez', 'Bass', 'BAS-IBZ-003', 'Zone F / Rack 03', 4, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
-                ('TRBX304', 'Red', 'Yamaha', 'Bass', 'BAS-YAM-004', 'Zone F / Rack 04', 5, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop'),
-                ('StingRay Ray4', 'Black', 'Sterling', 'Bass', 'BAS-STR-005', 'Zone F / Rack 05', 2, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=200&auto=format&fit=crop');`;
-            db.run(insertInventory);
-
-            // --- สร้างตาราง Order ---
-            db.run(`CREATE TABLE IF NOT EXISTS Orders (
-                order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                item_id INTEGER,
-                user_id INTEGER,
-                order_quantity INTEGER,
-                status TEXT,
-                detail TEXT,
-                timestamp TEXT DEFAULT (DATETIME('now', 'localtime')),
-                FOREIGN KEY (item_id) REFERENCES Inventory(id),
-                FOREIGN KEY (user_id) REFERENCES Users(id)
-                );`);
-
-            // --- สร้างตาราง ActivityLog ---
-            db.run(`CREATE TABLE IF NOT EXISTS ActivityLog (
-                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT,
-                timestamp TEXT DEFAULT (DATETIME('now','localtime')),
-                activity_type TEXT,
-                product_name TEXT
-            )`);
-        });
+        db.run("PRAGMA foreign_keys = ON"); 
     }
 });
 //!SECTION
@@ -170,7 +66,7 @@ app.post('/login', (req, res) => {
     let ip_address = req.ip || req.socket.remoteAddress || 'Unknown IP';
 
     if (ip_address === '::1' || ip_address === '::ffff:127.0.0.1') {
-    ip_address = '127.0.0.1 (Localhost)';
+        ip_address = '127.0.0.1 (Localhost)';
     }
 
     const sql = `SELECT * FROM users WHERE username = ? AND password = ?`;
@@ -182,8 +78,8 @@ app.post('/login', (req, res) => {
 
         if (row) {
             // ล็อกอินสำเร็จ -> บันทึก Log สถานะ Success
-            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
-                   [username, row.name, 'Success', ip_address]);
+            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`,
+                [username, row.name, 'Success', ip_address]);
 
             req.session.user = {
                 id: row.id,
@@ -191,7 +87,7 @@ app.post('/login', (req, res) => {
                 role: row.role,
                 username: row.username
             };
-            
+
             // แยกเส้นทางเข้าหน้าเว็บตาม Role
             if (row.role === 'staff') {
                 res.redirect('/inventory'); // Staff ไปหน้าคลังสินค้าเลย
@@ -200,8 +96,8 @@ app.post('/login', (req, res) => {
             }
         } else {
             // ล็อกอินไม่สำเร็จ -> บันทึก Log สถานะ Failed (ชื่อผู้ใช้เป็น Unknown)
-            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
-                   [username, 'Unknown', 'Failed', ip_address]);
+            db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`,
+                [username, 'Unknown', 'Failed', ip_address]);
 
             res.render('login', { error: 'Username หรือ Password ไม่ถูกต้อง' });
         }
@@ -218,11 +114,11 @@ app.get('/logout', (req, res) => {
         const username = req.session.user.username || 'Unknown';
         const displayName = req.session.user.name || 'Unknown';
 
-        db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`, 
-            [username, displayName, 'Logout', ip_address], 
+        db.run(`INSERT INTO LoginLog (username, display_name, status, ip_address) VALUES (?, ?, ?, ?)`,
+            [username, displayName, 'Logout', ip_address],
             (err) => {
                 if (err) console.error("Error logging logout:", err.message);
-    
+
                 req.session.destroy();
                 res.redirect('/');
             }
@@ -232,7 +128,6 @@ app.get('/logout', (req, res) => {
         res.redirect('/');
     }
 });
-//!SECTION
 
 // ==========================================
 // SECTION 4. หน้าหลัก (Home & Inventory)
@@ -241,44 +136,46 @@ app.get('/logout', (req, res) => {
 app.get('/home', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
-    // ป้องกันไม่ให้ staff แอบเข้ามาหน้า Dashboard
     if (req.session.user.role === 'staff') {
         return res.redirect('/inventory');
     }
 
-    // ดึงสถิติต่างๆ จากฐานข้อมูลเพื่อส่งให้หน้า Dashboard
     const sqlStats = `
         SELECT 
             (SELECT SUM(quantity) FROM Inventory) AS totalStock,
             (SELECT COUNT(*) FROM Inventory WHERE quantity <= 5 AND quantity > 0) AS lowStock,
-            (SELECT COUNT(*) FROM Orders WHERE status = 'Pending') AS pendingOrders,
+            (SELECT COUNT(*) FROM Orders WHERE status = 'รอการอนุมัติ') AS pendingOrders,
             (SELECT COUNT(*) FROM Inventory WHERE quantity > 50) AS overStock
     `;
 
     db.get(sqlStats, [], (err, stats) => {
-        if (err) {
-            console.error("Error fetching stats:", err.message);
-            return res.status(500).send("Database Error");
-        }
+        if (err) return res.status(500).send("Database Error");
 
-        // ดึงประวัติการเข้าสู่ระบบ 5 รายการล่าสุด
-        const sqlLogs = `SELECT * FROM LoginLog ORDER BY login_time DESC LIMIT 10`;
+        const sqlLogs = `SELECT * FROM LoginLog ORDER BY login_time DESC LIMIT 5`;
 
         db.all(sqlLogs, [], (err, logs) => {
-            if (err) {
-                console.error("Error fetching login logs:", err.message);
-                return res.status(500).send("Database Error");
-            }
+            if (err) return res.status(500).send("Database Error");
 
-            // ส่งตัวแปรทั้งหมดไปให้ home.ejs
-            res.render('home', {
-                user: req.session.user,
-                currentPage: 'home',
-                totalStock: stats.totalStock || 0,
-                lowStock: stats.lowStock || 0,
-                pendingOrders: stats.pendingOrders || 0,
-                overStock: stats.overStock || 0,
-                loginLogs: logs // ตัวแปรสำหรับแสดงในตาราง LoginLog
+            const sqlChart = `SELECT category, COUNT(*) as count FROM Inventory GROUP BY category`;
+            
+            db.all(sqlChart, [], (err, categoryData) => {
+                if (err) return res.status(500).send("Database Error");
+
+                const chartLabels = categoryData.map(row => row.category);
+                const chartSeries = categoryData.map(row => row.count);
+
+                // ส่งตัวแปรไปที่ home.ejs
+                res.render('home', {
+                    user: req.session.user,
+                    currentPage: 'home',
+                    totalStock: stats.totalStock || 0,
+                    lowStock: stats.lowStock || 0,
+                    pendingOrders: stats.pendingOrders || 0,
+                    overStock: stats.overStock || 0,
+                    loginLogs: logs,
+                    chartLabels: chartLabels, 
+                    chartSeries: chartSeries  
+                });
             });
         });
     });
@@ -361,8 +258,6 @@ app.post('/inventory/edit/:id', (req, res) => {
 // Route สำหรับลบสินค้า (Delete Product)
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
-    
-    // const { name, details, brand, category, zone, quantity, image } = req.body;
 
     // ป้องกัน Staff ลบสินค้า
     if (req.session.user.role === 'staff') {
@@ -389,8 +284,8 @@ app.post('/inventory/delete/:id', (req, res) => {
             //Keep Log by calling logActivity() function
             logActivity(req.session.user.name, "DELETE_PRODUCT", productName);
             res.redirect('/inventory');
-            });
         });
+    });
 });
 //!SECTION
 
@@ -528,6 +423,7 @@ app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
     });
 });
 //!SECTION
+
 // ==========================================
 // SECTION 6. เข้าสู่หน้า Order Management
 // ==========================================
@@ -562,15 +458,15 @@ app.get('/orders', (req, res) => {
                             WHEN 'รอการจัดส่ง' THEN 3
                             WHEN 'สินค้าออกจากโกดัง' THEN 4
                         END;`;
-    db.all(selectOrders, [], (dataErr, dataRows) => {
-        if (dataErr) {
+    db.all(selectOrders, [], (err, dataRows) => {
+        if (err) {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
 
         db.all(countStatus, [], (cntErr, cntRows) => {
             if (cntErr) {
-                console.error(err.message);
+                console.error(cntErr.message);
                 return res.status(500).send("Database Error")
             }
 
@@ -615,18 +511,17 @@ app.post('/orders/add-orders/:id', (req, res) => {
     const { detail, inputQuantity } = req.body;
 
     const selectQty = `SELECT quantity FROM Inventory WHERE id = ?`;
-    db.get(selectQty, [ inventoryId ], (err, row) => {
+    db.get(selectQty, [inventoryId], (err, row) => {
         //ทำการเช็คก่อนว่า inputQuantity มันเยอะกว่า quantity ใน Inventory หรือกรณีใส่เลข 0 และ negative numbers
         if (err) {
-                return res.status(500).send("Database Error" + err);
+            return res.status(500).send("Database Error" + err);
         }
 
         if (!inputQuantity || inputQuantity <= 0) {
-            // return res.status(400).send("จำนวนไม่ถูกต้อง");
             req.session.errMsg = "จำนวนไม่ถูกต้อง";
             return res.redirect('/orders');
         }
-        if (inputQuantity > row) {
+        if (inputQuantity > row.quantity) {
             return res.status(400).send("จำนวนเกินสต็อก");
         }
 
@@ -641,7 +536,6 @@ app.post('/orders/add-orders/:id', (req, res) => {
                 return res.status(500).send("Database Error" + err);
             }
             //INSERT เสร็จต้องไปลบรายการออกจาก Inventory ด้วย
-            // const currentQuantity = inventory.quantity - quantity;
             const reduceInventory = `UPDATE Inventory
                                     SET quantity = quantity - ?
                                     WHERE id = ?;`;
@@ -652,8 +546,26 @@ app.post('/orders/add-orders/:id', (req, res) => {
                 res.redirect('/orders');
             });
         });
-        });
     });
+});
+
+app.post('/orders/update-status/:id', (req, res) => {
+    const orderId = req.params.id;
+    const status = req.body.status;
+    const sql = `
+        UPDATE Orders
+        SET status = ?
+        WHERE order_id = ?
+    `;
+
+    db.run(sql, [status, orderId], (err) => {
+        if (err) {
+            console.error(err);
+            return res.json({ success: false });
+        }
+        res.json({ success: true });
+    });
+});
 //!SECTION
 
 // ==========================================
@@ -661,14 +573,12 @@ app.post('/orders/add-orders/:id', (req, res) => {
 // ==========================================
 app.get('/api/product/:id', (req, res) => {
     const productId = req.params.id;
-    // แก้ไขจาก Products เป็น Inventory ให้ตรงกับชื่อตารางปัจจุบัน
     const sql = `SELECT * FROM Inventory WHERE id = ?`;
 
     db.get(sql, [productId], (err, row) => {
         if (err || !row) {
             return res.status(404).json({ error: "Product not found" });
         }
-        console.log("Send data from /api/product/:id back with ", row);
         res.json(row);
     });
 });
