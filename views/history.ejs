@@ -20,52 +20,85 @@
                 <h1>กิจกรรมก่อนหน้า</h1>
                 <p>ติดตามการเคลื่อนไหวของสินค้าในคลัง การปรับเปลี่ยนระบบ และกิจกรรมทำของพนักงาน</p>
             </div>
-            <button class="export-btn">Export CSV</button>
         </div>
 
 
         <!-- Filter -->
-        <div class="filter-box">
+        <form class="filter-box" method="GET" action="/history">
 
-            <div class="filter-row">
+            <div class="filter-grid">
+
                 <div class="filter-group">
                     <label>ช่วงวันที่</label>
-                    <input type="text" placeholder="Select dates">
+                    <input type="date" name="startDate">
+                </div>
+
+                <div class="filter-group">
+                    <label>ถึงวันที่</label>
+                    <input type="date" name="endDate">
                 </div>
 
                 <div class="filter-group">
                     <label>ประเภทของกิจกรรม</label>
-                    <select>
-                        <option>ทั้งหมด</option>
-                    </select>
+                    <div class="dropdown" id="activityDropdown">
+                        <div class="dropdown-selected">
+                            ทั้งหมด
+                        </div>
+
+                        <div class="dropdown-menu">
+
+                            <div class="dropdown-item" data-value="">
+                                ทั้งหมด
+                            </div>
+
+                            <div class="dropdown-item" data-value="ADD_PRODUCT">
+                                เพิ่ม
+                            </div>
+
+                            <div class="dropdown-item" data-value="DELETE_PRODUCT">
+                                ลบ
+                            </div>
+
+                            <div class="dropdown-item" data-value="EDIT_PRODUCT">
+                                แก้ไข
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" name="type" value="">
+
+                    </div>
+                </div>
+            
+                <div class="filter-group">
+                    <label>ชื่อสินค้า</label>
+                    <input type="text" name="product">
                 </div>
 
                 <div class="filter-group">
                     <label>พนักงาน</label>
-                    <input type="text" placeholder="ค้นหาพนักงาน...">
+                    <input type="text" name="user" placeholder="ค้นหาพนักงาน...">
                 </div>
+            </div>
 
                 <div style="display:flex;align-items:flex-end;">
-                    <button class="filter-btn">Filter</button>
+                    <button type="submit" class="filter-btn">Filter</button>
                 </div>
-            </div>
-
             <div class="quick-filters">
-                <span style="color:#a1a1a1;font-size:12px;">QUICK FILTERS:</span>
-                <div class="quick-pill pill-inbound">เพิ่ม</div>
-                <div class="quick-pill pill-outbound">ลบ</div>
-                <div class="quick-pill pill-edits">แก้ไข</div>
-                <div class="quick-pill pill-audits">ตรวจสอบ</div>
+                <a href="/history?type=ADD_PRODUCT" class="quick-pill pill-inbound">เพิ่ม</a>
+                <a href="/history?type=DELETE_PRODUCT" class="quick-pill pill-outbound">ลบ</a>
+                <a href="/history?type=EDIT_PRODUCT" class="quick-pill pill-edits">แก้ไข</a>
+                <a href="/history" class="quick-pill pill-audits">ทั้งหมด</a>
             </div>
 
-        </div>
+        </form>
 
 
         <!-- Table -->
         <table class="history-table">
     <thead>
         <tr>
-            <th>LOG_ID</th>
+            <th>LOG ID</th>
             <th>ACTION TYPE</th>
             <th>TIMESTAMP</th>
             <th>USER</th>
@@ -107,12 +140,63 @@
 
         <!-- Pagination -->
         <div class="pagination">
-            <div class="page-btn">Previous</div>
-            <div class="page-btn active">1</div>
-            <div class="page-btn">2</div>
-            <div class="page-btn">Next</div>
-        </div>
+
+    <% if(page > 1){ %>
+        <a class="page-btn" href="?page=<%= page-1 %>">Previous</a>
+    <% } %>
+
+    <% for(let i = 1; i <= totalPages; i++){ %>
+        <a 
+        class="page-btn <%= page === i ? 'active' : '' %>" 
+        href="?page=<%= i %>">
+        <%= i %>
+        </a>
+    <% } %>
+
+    <% if(page < totalPages){ %>
+        <a class="page-btn" href="?page=<%= page+1 %>">Next</a>
+    <% } %>
+
+</div>
 
     </div>
 </body>
 </html>
+
+<script>
+// Dropdown
+const dropdown = document.querySelector("#activityDropdown")
+
+if(dropdown){
+
+const selected = dropdown.querySelector(".dropdown-selected")
+const items = dropdown.querySelectorAll(".dropdown-item")
+const input = dropdown.querySelector("input")
+
+selected.addEventListener("click", () => {
+	dropdown.classList.toggle("open")
+})
+
+items.forEach(item => {
+
+	item.addEventListener("click", () => {
+
+		selected.textContent = item.textContent
+		input.value = item.dataset.value
+
+		dropdown.classList.remove("open")
+
+	})
+
+})
+
+document.addEventListener("click", e => {
+
+	if(!dropdown.contains(e.target)){
+		dropdown.classList.remove("open")
+	}
+
+})
+
+}
+</script>

@@ -22,7 +22,7 @@
         }
 
         .modal-box {
-            background: white;
+            background: #2d2418;
             padding: 30px;
             border-radius: 12px;
             width: 100%;
@@ -36,9 +36,9 @@
         }
 
         /* ตกแต่งฟอร์มในหน้า Admin ให้ดูสวยขึ้น */
-        .modal-box h2 { margin-top: 0; margin-bottom: 20px; color: #111; font-size: 20px; }
+        .modal-box h2 { margin-top: 0; margin-bottom: 20px; color: #ffffff; font-size: 20px; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; font-size: 13px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #cdcdcd; font-size: 13px; }
         .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
         .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
     </style>
@@ -131,7 +131,7 @@
         <div id="addUserModal" class="modal-overlay">
             <div class="modal-box">
                 <h2>Add New User</h2>
-                <form action="/admintool/add" method="POST">
+                <form action="/admintool/add" method="POST" id="addUserForm">
                     <div class="form-group">
                         <label>Username</label>
                         <input type="text" name="username" class="form-control" required placeholder="Enter username">
@@ -154,7 +154,7 @@
                         </select>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" onclick="closeModal('addUserModal')" class="btn-outline">Cancel</button>
+                        <button type="button" class="btn-cancel" onclick="closeAddUserModal()">Cancel</button>
                         <button type="submit" class="btn-primary" style="width: auto; margin-top: 0;">Save User</button>
                     </div>
                 </form>
@@ -178,7 +178,7 @@
                         </select>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" onclick="closeModal('editUserModal')" class="btn-outline">Cancel</button>
+                        <button type="button" class="btn-cancel" onclick="closeModal('editUserModal')">Cancel</button>
                         <button type="submit" class="btn-primary" style="width: auto; margin-top: 0;">Update User</button>
                     </div>
                 </form>
@@ -212,6 +212,28 @@
                     event.target.style.display = 'none';
                     event.target.classList.remove('active');
                 }
+            }
+
+            // ล้างค่าทุก input / ปิด modal
+            function closeAddUserModal() {
+
+                const modal = document.getElementById("addUserModal");
+                const form = document.getElementById("addUserForm");
+
+                form.reset();
+                modal.style.display = "none";
+
+            }
+
+
+            function openAddUserModal(){
+
+                const modal = document.getElementById("addUserModal");
+                const form = document.getElementById("addUserForm");
+
+                form.reset();
+                modal.style.display = "flex";
+
             }
         </script>
 </body>
