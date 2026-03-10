@@ -1,8 +1,3 @@
-/* PUBLIC TRYNOT TO MESS!!!! */
-
-/* =========================================
-   1. Base Setup & ตัวแปรสี
-   ========================================= */
 :root {
     /* Colors */
     --primary: #eead2b;
@@ -42,9 +37,6 @@ body {
     min-height: 100vh;
 }
 
-/* =========================================
-   Form Elements (ใช้ได้ทุกหน้า)
-   ========================================= */
 .form-group {
     margin-bottom: 20px;
 }
@@ -128,11 +120,6 @@ body {
     border-color: var(--primary);
 }
 
-/* =========================================
-   7. Modals (Overlay)
-   ========================================= */
-
-/* ตัว overlay จะครอบทั้งหน้าจอเลย มีการใส่ blur ให้พื้นหลัง blur หมด และก็เพิ่ม box-modal ไว้ตรงกลาง */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -147,12 +134,12 @@ body {
     z-index: 2000;
 }
 
-/* เปลี่ยน display หลังจาก overlay (ให้แสดงผล) */
+
 .modal-overlay.active {
     display: flex;
 }
 
-/* modal-box คือเนื้อหาตรงกลางของ overlay จริง ๆ */
+
 .modal-box {
     background: var(--panel-bg);
     padding: 30px;
@@ -171,11 +158,6 @@ body {
 }
 
 
-/* =========================================
-   8. Inventory & Data Tables Specifics
-   ========================================= */
-
-/* Filter Bar */
 .filter-bar {
     background: var(--panel-bg);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -214,7 +196,7 @@ select.form-control {
     background-size: 10px auto;
 }
 
-/* Table Cells Data */
+
 .product-cell {
     display: flex;
     align-items: center;
@@ -298,7 +280,7 @@ select.form-control {
     box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
 }
 
-/* Buttons inside Table */
+
 .btn-icon {
     background: transparent;
     border: none;
@@ -322,7 +304,7 @@ select.form-control {
     color: #1a1a1b;
 }
 
-/* Pagination */
+
 .pagination-wrapper {
     display: flex;
     justify-content: space-between;
@@ -366,7 +348,7 @@ select.form-control {
     border-color: var(--primary);
 }
 
-/* Footer Dashboard */
+
 .dash-footer {
     display: flex;
     justify-content: space-between;
@@ -396,9 +378,6 @@ select.form-control {
     font-weight: 800;
 }
 
-/* =========================================
-   6. Dashboard Components (Stats, Tables, Badges)
-   ========================================= */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -543,9 +522,6 @@ select.form-control {
     font-size: 15px;
 }
 
-/* =========================================
-   9. Custom Action Buttons (สำหรับปุ่ม แก้ไข/ลบ)
-   ========================================= */
 .action-buttons {
     display: flex;
     justify-content: flex-end;
@@ -568,7 +544,7 @@ select.form-control {
 
 .btn-action span {
     font-size: 18px;
-    /* ปรับขนาดไอคอนให้พอดี */
+    
 }
 
 .btn-action:hover {
@@ -588,11 +564,7 @@ select.form-control {
     color: var(--danger);
 }
 
-/* =========================================
-   10. Modal Enhancements (Animation & Footer)
-   ========================================= */
 .modal-box {
-    /* เพิ่ม Animation ให้ Modal */
     transform: scale(0.95) translateY(10px);
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
