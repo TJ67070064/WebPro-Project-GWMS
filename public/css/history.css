@@ -1,6 +1,4 @@
 
-   /* HISTORY PAGE (ADD-ON CSS) */
-
 .history-wrapper {
     max-width: 1400px;
     margin: 40px auto;
@@ -27,7 +25,6 @@
     background: rgba(255,255,255,0.08);
 }
 
-/*FILTER BOX*/
 
 .filter-box {
     background: linear-gradient(145deg, rgba(45,36,24,0.7), rgba(20,20,20,0.6));
@@ -67,7 +64,7 @@
 	appearance:none;
 }
 
-/* date picker icon */
+
 .filter-group input[type="date"]::-webkit-calendar-picker-indicator{
     filter: invert(77%) sepia(68%) saturate(525%) hue-rotate(4deg) brightness(104%) contrast(96%);
     cursor:pointer;
@@ -80,7 +77,7 @@
 	border-color:rgba(255,255,255,0.25);
 }
 
-/* focus */
+
 
 .filter-group input:focus,
 .filter-group select:focus{
@@ -89,7 +86,6 @@
 	box-shadow:0 0 0 1px rgba(238,173,43,0.4);
 }
 
-/*filter btn*/
 
 .filter-submit{
 	margin-top:20px;
@@ -115,7 +111,6 @@
 	transform:scale(0.97);
 }
 
-/*quick filter*/
 .quick-filters{
 	border-top:1px solid rgba(255,255,255,0.08);
 	padding-top:22px;
@@ -124,7 +119,8 @@
 	gap:12px;
 }
 
-/* pill */
+
+
 .quick-pill{
 	padding:6px 14px;
 	border-radius:999px;
@@ -142,14 +138,14 @@
 	transition:all 0.15s ease;
 }
 
-/* hover */
+
 
 .quick-pill:hover{
 	transform:translateY(-1px);
 	box-shadow:0 4px 10px rgba(0,0,0,0.25);
 }
 
-/* active */
+
 
 .quick-pill:active{
 	transform:scale(0.75);
@@ -197,8 +193,6 @@
 	background:rgba(59,130,246,0.18);
 }
 
-
-/*custom dropdown*/
 
 .dropdown{
     position:relative;
@@ -259,8 +253,6 @@
 	appearance:auto; 
 }
 
-/*table*/
-
 .history-table{
 	width:100%;
 	border-collapse:collapse;
@@ -304,7 +296,11 @@
 	width:80px;
 }
 
-/*pagination*/
+
+
+.status-green{color:#22c55e;font-weight:600;}
+.status-red{color:#ef4444;font-weight:600;}
+
 
 .pagination{
 	display:flex;
