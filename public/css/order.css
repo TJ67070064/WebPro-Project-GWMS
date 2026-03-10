@@ -179,3 +179,36 @@ Table inside modal
     background: var(--primary-hover);
     transform: translateY(-1px);
 }
+
+.status-badge{
+    padding:4px 10px;
+    border-radius:12px;
+    font-size:12px;
+    font-weight:600;
+    display:inline-block;
+    margin-bottom:6px;
+}
+
+/* รอการอนุมัติ */
+.status-รอการอนุมัติ{
+    background:#2b2f3a;
+    color: var(--text-muted);
+}
+
+/* กำลังเตรียมสินค้า */
+.status-กำลังเตรียมสินค้า{
+    background:#2b2f3a;
+    color: var(--warning);
+}
+
+/* รอการจัดส่ง */
+.status-รอการจัดส่ง{
+    background:#2b2f3a;
+    color: var(--info);
+}
+
+/* สินค้าออกจากโกดัง */
+.status-สินค้าออกจากโกดัง{
+    background:#2b2f3a;
+    color: var(--success);
+}

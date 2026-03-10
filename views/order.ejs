@@ -102,7 +102,22 @@
                             </td>
                             <!-- Join มาเรียบร้อยแล้ว สามารถใช้ item_id, user_name ได้ -->
                             <td> <%= order.user_name %> </td>
-                            <td> <%= order.status %> </td>
+                            <td>
+                                <div class="status-wrapper">
+                                    <span class="status-badge status-<%= order.status %>">
+                                        <%= order.status %>
+                                    </span>
+
+                                    <select class="form-control status-dropdown"
+                                    <%= user.role === "staff" ? "disabled" : "" %>
+                                    onchange="updateStatus(<%= order.order_id %>, this.value)">
+                                        <option value="รอการอนุมัติ" <%= order.status === "รอการอนุมัติ" ? "selected" : "" %>>รอการอนุมัติ</option>
+                                        <option value="กำลังเตรียมสินค้า" <%= order.status === "กำลังเตรียมสินค้า" ? "selected" : "" %>>กำลังเตรียมสินค้า</option>
+                                        <option value="รอการจัดส่ง" <%= order.status === "รอการจัดส่ง" ? "selected" : "" %>>รอการจัดส่ง</option>
+                                        <option value="สินค้าออกจากโกดัง" <%= order.status === "สินค้าออกจากโกดัง" ? "selected" : "" %>>สินค้าออกจากโกดัง</option>
+                                    </select>
+                                </div>
+                            </td>
                             <td> <%= order.order_quantity %> </td>
                             <td> <%= order.detail %> </td>
                         </tr>
@@ -210,6 +225,36 @@
             closeModal("showInventoryModal");
             openModal("addOrderModal");
         }
+
+        //Update status หลังจาก user กด dropdown แล้ว onchange มาเรียกใช้
+async function updateStatus(orderId, status) {
+
+    try {
+
+        const response = await fetch(`/orders/update-status/${orderId}`, { //fetch ไป ก็จะรอการตอบกลับเป็น json เพื่อ catch ทำงานได้
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ status })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.href = "/orders";
+        } else {
+            alert("ไม่สามารถเปลี่ยนสถานะได้");
+        }
+
+    } catch (error) {
+
+        console.error(error);
+        alert("เกิดข้อผิดพลาด");
+
+    }
+
+}
 
         function showError(message) {
             console.log("Error happended");
