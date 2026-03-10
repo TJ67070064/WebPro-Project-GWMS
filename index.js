@@ -550,6 +550,7 @@ app.post('/orders/add-orders/:id', (req, res) => {
             });
         });
     });
+});
 
 app.post('/orders/update-status/:id', (req, res) => {
 
