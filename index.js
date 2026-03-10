@@ -259,8 +259,6 @@ app.post('/inventory/edit/:id', (req, res) => {
 app.post('/inventory/delete/:id', (req, res) => {
     if (!req.session.user) return res.redirect('/');
 
-    // const { name, details, brand, category, zone, quantity, image } = req.body;
-
     // ป้องกัน Staff ลบสินค้า
     if (req.session.user.role === 'staff') {
         return res.redirect('/inventory');
@@ -425,6 +423,7 @@ app.post('/admintool/edit/:id', requireAdmin, (req, res) => {
     });
 });
 //!SECTION
+
 // ==========================================
 // SECTION 6. เข้าสู่หน้า Order Management
 // ==========================================
@@ -459,15 +458,15 @@ app.get('/orders', (req, res) => {
                             WHEN 'รอการจัดส่ง' THEN 3
                             WHEN 'สินค้าออกจากโกดัง' THEN 4
                         END;`;
-    db.all(selectOrders, [], (dataErr, dataRows) => {
-        if (dataErr) {
+    db.all(selectOrders, [], (err, dataRows) => {
+        if (err) {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
 
         db.all(countStatus, [], (cntErr, cntRows) => {
             if (cntErr) {
-                console.error(err.message);
+                console.error(cntErr.message);
                 return res.status(500).send("Database Error")
             }
 
@@ -519,11 +518,10 @@ app.post('/orders/add-orders/:id', (req, res) => {
         }
 
         if (!inputQuantity || inputQuantity <= 0) {
-            // return res.status(400).send("จำนวนไม่ถูกต้อง");
             req.session.errMsg = "จำนวนไม่ถูกต้อง";
             return res.redirect('/orders');
         }
-        if (inputQuantity > row) {
+        if (inputQuantity > row.quantity) {
             return res.status(400).send("จำนวนเกินสต็อก");
         }
 
@@ -538,7 +536,6 @@ app.post('/orders/add-orders/:id', (req, res) => {
                 return res.status(500).send("Database Error" + err);
             }
             //INSERT เสร็จต้องไปลบรายการออกจาก Inventory ด้วย
-            // const currentQuantity = inventory.quantity - quantity;
             const reduceInventory = `UPDATE Inventory
                                     SET quantity = quantity - ?
                                     WHERE id = ?;`;
@@ -550,9 +547,9 @@ app.post('/orders/add-orders/:id', (req, res) => {
             });
         });
     });
+});
 
 app.post('/orders/update-status/:id', (req, res) => {
-
     const orderId = req.params.id;
     const status = req.body.status;
     const sql = `
@@ -568,7 +565,6 @@ app.post('/orders/update-status/:id', (req, res) => {
         }
         res.json({ success: true });
     });
-
 });
 //!SECTION
 
@@ -577,14 +573,12 @@ app.post('/orders/update-status/:id', (req, res) => {
 // ==========================================
 app.get('/api/product/:id', (req, res) => {
     const productId = req.params.id;
-    // แก้ไขจาก Products เป็น Inventory ให้ตรงกับชื่อตารางปัจจุบัน
     const sql = `SELECT * FROM Inventory WHERE id = ?`;
 
     db.get(sql, [productId], (err, row) => {
         if (err || !row) {
             return res.status(404).json({ error: "Product not found" });
         }
-        console.log("Send data from /api/product/:id back with ", row);
         res.json(row);
     });
 });
