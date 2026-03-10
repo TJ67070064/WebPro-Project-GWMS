@@ -21,15 +21,6 @@
     color: #a1a1a1;
 }
 
-.export-btn {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
 .export-btn:hover{
     background: rgba(255,255,255,0.08);
 }
@@ -74,7 +65,13 @@
 }
 
 
+.filter-group input[type="date"]::-webkit-calendar-picker-indicator{
+    filter: invert(77%) sepia(68%) saturate(525%) hue-rotate(4deg) brightness(104%) contrast(96%);
+    cursor:pointer;
+}
 
+
+/* hover */
 .filter-group input:hover,
 .filter-group select:hover{
 	border-color:rgba(255,255,255,0.25);
@@ -113,7 +110,6 @@
 .filter-btn:active{
 	transform:scale(0.97);
 }
-
 
 .quick-filters{
 	border-top:1px solid rgba(255,255,255,0.08);
@@ -243,15 +239,6 @@
 .dropdown-item:hover{
     background:rgba(255,255,255,0.06);
 }
-/* dropdown arrow */
-
-.filter-group select{
-	padding-right:40px;
-	background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-	background-repeat:no-repeat;
-	background-position:right 12px center;
-	background-size:18px;
-}
 
 /* dropdown options */
 
@@ -309,7 +296,7 @@
 	width:80px;
 }
 
-/* status */
+
 
 .status-green{color:#22c55e;font-weight:600;}
 .status-red{color:#ef4444;font-weight:600;}

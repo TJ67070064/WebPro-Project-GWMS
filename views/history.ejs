@@ -3,165 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GWMS AdminTools</title>
+    <title>GWMS History</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/history.css">
     <link rel="stylesheet" href="/css/navbar.css">
 </head>
+
 <body>
     <%- include('includes/navbar') %>
-    <div class="history-wrapper">
 
-        <!-- Header -->
-        <div class="history-header">
-            <div>
-                <h1>กิจกรรมก่อนหน้า</h1>
-                <p>ติดตามการเคลื่อนไหวของสินค้าในคลัง การปรับเปลี่ยนระบบ และกิจกรรมทำของพนักงาน</p>
+    <main class="main">
+        <div class="history-wrapper">
+
+            <!-- Header -->
+            <div class="history-header">
+                <div>
+                    <h1>กิจกรรมก่อนหน้า</h1>
+                    <p>ติดตามการเคลื่อนไหวของสินค้าในคลัง การปรับเปลี่ยนระบบ และกิจกรรมทำของพนักงาน</p>
+                </div>
             </div>
-        </div>
 
+            <!-- Filter -->
+            <form class="filter-box" method="GET" action="/history">
 
-        <!-- Filter -->
-        <form class="filter-box" method="GET" action="/history">
+                <div class="filter-grid">
 
-            <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>ช่วงวันที่</label>
+                        <input type="date" name="startDate">
+                    </div>
 
-                <div class="filter-group">
-                    <label>ช่วงวันที่</label>
-                    <input type="date" name="startDate">
-                </div>
+                    <div class="filter-group">
+                        <label>ถึงวันที่</label>
+                        <input type="date" name="endDate">
+                    </div>
 
-                <div class="filter-group">
-                    <label>ถึงวันที่</label>
-                    <input type="date" name="endDate">
-                </div>
-
-                <div class="filter-group">
-                    <label>ประเภทของกิจกรรม</label>
-                    <div class="dropdown" id="activityDropdown">
-                        <div class="dropdown-selected">
-                            ทั้งหมด
-                        </div>
-
-                        <div class="dropdown-menu">
-
-                            <div class="dropdown-item" data-value="">
+                    <div class="filter-group">
+                        <label>ประเภทของกิจกรรม</label>
+                        <div class="dropdown" id="activityDropdown">
+                            <div class="dropdown-selected">
                                 ทั้งหมด
                             </div>
 
-                            <div class="dropdown-item" data-value="ADD_PRODUCT">
-                                เพิ่ม
+                            <div class="dropdown-menu">
+
+                                <div class="dropdown-item" data-value="">
+                                    ทั้งหมด
+                                </div>
+
+                                <div class="dropdown-item" data-value="ADD_PRODUCT">
+                                    เพิ่ม
+                                </div>
+
+                                <div class="dropdown-item" data-value="DELETE_PRODUCT">
+                                    ลบ
+                                </div>
+
+                                <div class="dropdown-item" data-value="EDIT_PRODUCT">
+                                    แก้ไข
+                                </div>
+
                             </div>
 
-                            <div class="dropdown-item" data-value="DELETE_PRODUCT">
-                                ลบ
-                            </div>
-
-                            <div class="dropdown-item" data-value="EDIT_PRODUCT">
-                                แก้ไข
-                            </div>
-
+                            <input type="hidden" name="type" value="">
                         </div>
+                    </div>
+                
+                    <div class="filter-group">
+                        <label>ชื่อสินค้า</label>
+                        <input type="text" name="product">
+                    </div>
 
-                        <input type="hidden" name="type" value="">
-
+                    <div class="filter-group">
+                        <label>พนักงาน</label>
+                        <input type="text" name="user" placeholder="ค้นหาพนักงาน...">
                     </div>
                 </div>
-            
-                <div class="filter-group">
-                    <label>ชื่อสินค้า</label>
-                    <input type="text" name="product">
-                </div>
-
-                <div class="filter-group">
-                    <label>พนักงาน</label>
-                    <input type="text" name="user" placeholder="ค้นหาพนักงาน...">
-                </div>
-            </div>
 
                 <div style="display:flex;align-items:flex-end;">
                     <button type="submit" class="filter-btn">Filter</button>
                 </div>
-            <div class="quick-filters">
-                <a href="/history?type=ADD_PRODUCT" class="quick-pill pill-inbound">เพิ่ม</a>
-                <a href="/history?type=DELETE_PRODUCT" class="quick-pill pill-outbound">ลบ</a>
-                <a href="/history?type=EDIT_PRODUCT" class="quick-pill pill-edits">แก้ไข</a>
-                <a href="/history" class="quick-pill pill-audits">ทั้งหมด</a>
+
+                <div class="quick-filters">
+                    <a href="/history?type=ADD_PRODUCT" class="quick-pill pill-inbound">เพิ่ม</a>
+                    <a href="/history?type=DELETE_PRODUCT" class="quick-pill pill-outbound">ลบ</a>
+                    <a href="/history?type=EDIT_PRODUCT" class="quick-pill pill-edits">แก้ไข</a>
+                    <a href="/history" class="quick-pill pill-audits">ทั้งหมด</a>
+                </div>
+
+            </form>
+
+            <!-- Table -->
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>LOG ID</th>
+                        <th>ACTION TYPE</th>
+                        <th>TIMESTAMP</th>
+                        <th>USER</th>
+                        <th>PRODUCT</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                <% logs.forEach(log => { %>
+
+                <tr>
+                    <td><%= log.log_id %></td>
+
+                    <td>
+                    <% if (log.activity_type === "ADD_PRODUCT") { %>
+                        <span class="quick-pill pill-inbound">เพิ่ม</span>
+
+                    <% } else if (log.activity_type === "DELETE_PRODUCT") { %>
+                        <span class="quick-pill pill-outbound">ลบ</span>
+
+                    <% } else if (log.activity_type === "EDIT_PRODUCT") { %>
+                        <span class="quick-pill pill-edits">แก้ไข</span>
+
+                    <% } else { %>
+                        <span class="quick-pill pill-audits">ตรวจสอบ</span>
+                    <% } %>
+                    </td>
+
+                    <td><%= log.timestamp %></td>
+                    <td><%= log.username %></td>
+                    <td><%= log.product_name || '-' %></td>
+                </tr>
+
+                <% }) %>
+
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+
+                <% if(page > 1){ %>
+                    <a class="page-btn" href="?page=<%= page-1 %>">Previous</a>
+                <% } %>
+
+                <% for(let i = 1; i <= totalPages; i++){ %>
+                    <a class="page-btn <%= page === i ? 'active' : '' %>" href="?page=<%= i %>">
+                        <%= i %>
+                    </a>
+                <% } %>
+
+                <% if(page < totalPages){ %>
+                    <a class="page-btn" href="?page=<%= page+1 %>">Next</a>
+                <% } %>
+
             </div>
 
-        </form>
+        </div>
+    </main>
 
-
-        <!-- Table -->
-        <table class="history-table">
-    <thead>
-        <tr>
-            <th>LOG ID</th>
-            <th>ACTION TYPE</th>
-            <th>TIMESTAMP</th>
-            <th>USER</th>
-            <th>PRODUCT</th>
-        </tr>
-    </thead>
-
-    <tbody>
-
-        <% logs.forEach(log => { %>
-
-        <tr>
-            <td><%= log.log_id %></td>
-
-            <td>
-            <% if (log.activity_type === "ADD_PRODUCT") { %>
-                <span class="quick-pill pill-inbound">เพิ่ม</span>
-
-            <% } else if (log.activity_type === "DELETE_PRODUCT") { %>
-                <span class="quick-pill pill-outbound">ลบ</span>
-
-            <% } else if (log.activity_type === "EDIT_PRODUCT") { %>
-                <span class="quick-pill pill-edits">แก้ไข</span>
-
-            <% } else { %>
-                <span class="quick-pill pill-audits">ตรวจสอบ</span>
-            <% } %>
-            </td>
-
-            <td><%= log.timestamp %></td>
-            <td><%= log.username %></td>
-            <td><%= log.product_name || '-' %></td>
-        </tr>
-        <% }) %>
-
-    </tbody>
-</table>
-
-
-        <!-- Pagination -->
-        <div class="pagination">
-
-    <% if(page > 1){ %>
-        <a class="page-btn" href="?page=<%= page-1 %>">Previous</a>
-    <% } %>
-
-    <% for(let i = 1; i <= totalPages; i++){ %>
-        <a 
-        class="page-btn <%= page === i ? 'active' : '' %>" 
-        href="?page=<%= i %>">
-        <%= i %>
-        </a>
-    <% } %>
-
-    <% if(page < totalPages){ %>
-        <a class="page-btn" href="?page=<%= page+1 %>">Next</a>
-    <% } %>
-
-</div>
-
-    </div>
 </body>
-</html>
 
 <script>
 // Dropdown
