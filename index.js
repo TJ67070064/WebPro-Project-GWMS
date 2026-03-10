@@ -12,6 +12,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(express.json()); //แปลง JSON ที่ Client ส่งมาให้เป็น JavaScript Object
 app.use(express.urlencoded({ extended: true }));
 
 // ตั้งค่า Session
@@ -608,6 +609,26 @@ app.post('/orders/add-orders/:id', (req, res) => {
         });
         });
     });
+
+app.post('/orders/update-status/:id', (req, res) => {
+
+    const orderId = req.params.id;
+    const status = req.body.status;
+    const sql = `
+        UPDATE Orders
+        SET status = ?
+        WHERE order_id = ?
+    `;
+
+    db.run(sql, [status, orderId], (err) => {
+        if (err) {
+            console.error(err);
+            return res.json({ success: false });
+        }
+        res.json({ success: true });
+    });
+
+});
 //!SECTION
 
 // ==========================================

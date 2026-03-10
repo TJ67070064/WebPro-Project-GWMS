@@ -491,7 +491,9 @@
                 }
                 if (!exists) {
                     const newOption = document.createElement("option");
-                    newOption.value = brand; newOption.text = brand;
+                    newOption.value = brand;
+                    newOption.text = brand;
+
                     const otherOption = brandSelect.querySelector('option[value="other"]');
                     if (otherOption) brandSelect.insertBefore(newOption, otherOption);
                     else brandSelect.appendChild(newOption);
