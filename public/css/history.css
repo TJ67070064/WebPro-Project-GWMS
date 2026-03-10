@@ -1,6 +1,5 @@
-/* ===============================
-   HISTORY PAGE (ADD-ON CSS)
-   =============================== */
+
+   /* HISTORY PAGE (ADD-ON CSS) */
 
 .history-wrapper {
     max-width: 1400px;
@@ -24,22 +23,11 @@
     color: #a1a1a1;
 }
 
-.export-btn {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
 .export-btn:hover{
     background: rgba(255,255,255,0.08);
 }
 
-/* ===============================
-   FILTER BOX
-   =============================== */
+/*FILTER BOX*/
 
 .filter-box {
     background: linear-gradient(145deg, rgba(45,36,24,0.7), rgba(20,20,20,0.6));
@@ -79,8 +67,14 @@
 	appearance:none;
 }
 
-/* hover */
+/* date picker icon */
+.filter-group input[type="date"]::-webkit-calendar-picker-indicator{
+    filter: invert(77%) sepia(68%) saturate(525%) hue-rotate(4deg) brightness(104%) contrast(96%);
+    cursor:pointer;
+}
 
+
+/* hover */
 .filter-group input:hover,
 .filter-group select:hover{
 	border-color:rgba(255,255,255,0.25);
@@ -95,9 +89,7 @@
 	box-shadow:0 0 0 1px rgba(238,173,43,0.4);
 }
 
-/* ===============================
-   FILTER BUTTON
-   =============================== */
+/*filter btn*/
 
 .filter-submit{
 	margin-top:20px;
@@ -123,10 +115,7 @@
 	transform:scale(0.97);
 }
 
-/* ===============================
-   QUICK FILTERS
-   =============================== */
-
+/*quick filter*/
 .quick-filters{
 	border-top:1px solid rgba(255,255,255,0.08);
 	padding-top:22px;
@@ -136,7 +125,6 @@
 }
 
 /* pill */
-
 .quick-pill{
 	padding:6px 14px;
 	border-radius:999px;
@@ -210,9 +198,7 @@
 }
 
 
-/* ===============================
-   CUSTOM DROPDOWN
-   =============================== */
+/*custom dropdown*/
 
 .dropdown{
     position:relative;
@@ -259,8 +245,8 @@
 .dropdown-item:hover{
     background:rgba(255,255,255,0.06);
 }
-/* dropdown arrow */
 
+/* dropdown arrow */
 .filter-group select{
 	padding-right:40px;
 	background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
@@ -281,9 +267,8 @@
 	font-size:14px;
 	appearance:auto; 
 }
-/* ===============================
-   TABLE
-   =============================== */
+
+/*table*/
 
 .history-table{
 	width:100%;
@@ -328,14 +313,7 @@
 	width:80px;
 }
 
-/* status */
-
-.status-green{color:#22c55e;font-weight:600;}
-.status-red{color:#ef4444;font-weight:600;}
-
-/* ===============================
-   PAGINATION
-   =============================== */
+/*pagination*/
 
 .pagination{
 	display:flex;
