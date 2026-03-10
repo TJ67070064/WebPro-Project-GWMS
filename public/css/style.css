@@ -627,3 +627,10 @@ select.form-control {
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
+
+.bottom-layout-grid {
+    display: grid;
+    grid-template-columns: 4fr 6fr; 
+    gap: 30px; 
+    align-items: start;
+}
