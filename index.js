@@ -402,7 +402,13 @@ app.get('/history', (req, res) => {
 
     if (!req.session.user) return res.redirect('/');
 
-    const sql = `
+    const { startDate, endDate, type, user, product } = req.query;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    let sql = `
     SELECT 
         log_id,
         activity_type,
@@ -410,20 +416,60 @@ app.get('/history', (req, res) => {
         username,
         product_name
     FROM ActivityLog
-    ORDER BY timestamp DESC
+    WHERE 1=1
     `;
 
-    db.all(sql, [], (err, rows) => {
+    const params = [];
+
+    if (type) {
+        sql += " AND activity_type = ?";
+        params.push(type);
+    }
+
+    if (user) {
+        sql += " AND username LIKE ?";
+        params.push(`%${user}%`);
+    }
+
+    if (startDate) {
+        sql += " AND DATE(timestamp) >= ?";
+        params.push(startDate);
+    }
+
+    if (product) {
+        sql += " AND LOWER(product_name) LIKE LOWER(?)";
+        params.push(`${product.trim()}%`);
+    }
+
+    const countSql = `SELECT COUNT(*) as total FROM (${sql})`;
+
+    sql += " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
+    params.push(limit, offset);
+
+    db.get(countSql, params.slice(0, params.length - 2), (err, countResult) => {
 
         if (err) {
             console.error(err.message);
             return res.status(500).send("Database Error");
         }
 
-        res.render('history', {
-            user: req.session.user,
-            currentPage: 'history',
-            logs: rows
+        const totalPages = Math.ceil(countResult.total / limit);
+
+        db.all(sql, params, (err, rows) => {
+
+            if (err) {
+                console.error(err.message);
+                return res.status(500).send("Database Error");
+            }
+
+            res.render('history', {
+                user: req.session.user,
+                currentPage: 'history',
+                logs: rows,
+                page: page,
+                totalPages: totalPages
+            });
+
         });
 
     });
