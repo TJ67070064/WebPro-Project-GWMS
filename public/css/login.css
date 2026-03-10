@@ -5,9 +5,7 @@ body.login-page {
     align-items: center;
     padding: 20px;
 }
-/* =========================================
-   3. Login Page Styles
-   ========================================= */
+/* Login Page Styles*/
 .login-card {
     background: var(--panel-bg);
     backdrop-filter: blur(12px);
