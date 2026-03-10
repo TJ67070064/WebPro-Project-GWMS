@@ -21,10 +21,7 @@
     color: #a1a1a1;
 }
 
-.export-btn:hover{
-    background: rgba(255,255,255,0.08);
-}
-
+/*FILTER BOX*/
 
 .filter-box {
     background: linear-gradient(145deg, rgba(45,36,24,0.7), rgba(20,20,20,0.6));
