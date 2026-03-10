@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/navbar.css">
     <style>
-        /* สไตล์บังคับ Modal ไม่ให้ล่องหน / จอดำ */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -28,14 +27,12 @@
             width: 100%;
             max-width: 500px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            /* บังคับให้โชว์ เผื่อ style.css ซ่อนไว้ */
             opacity: 1 !important;
             visibility: visible !important;
             transform: scale(1) !important;
             display: block !important;
         }
 
-        /* ตกแต่งฟอร์มในหน้า Admin ให้ดูสวยขึ้น */
         .modal-box h2 { margin-top: 0; margin-bottom: 20px; color: #ffffff; font-size: 20px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #cdcdcd; font-size: 13px; }
@@ -186,7 +183,7 @@
         </div>
 
         <script>
-            // อัปเดต Script ให้เปิดกล่อง
+            
             function openModal(id) {
                 const modal = document.getElementById(id);
                 modal.style.display = 'flex';
@@ -206,7 +203,6 @@
                 openModal('editUserModal');
             }
 
-            //ถ้าเปิด overlay แล้วไปกด click ด้านนอกจะออกให้อัตโนมัติ
             window.onclick = function (event) {
                 if (event.target.classList.contains('modal-overlay')) {
                     event.target.style.display = 'none';
@@ -214,7 +210,6 @@
                 }
             }
 
-            // ล้างค่าทุก input / ปิด modal
             function closeAddUserModal() {
 
                 const modal = document.getElementById("addUserModal");

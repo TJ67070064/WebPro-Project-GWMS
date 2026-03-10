@@ -100,7 +100,6 @@
                                 minute: "2-digit"
                             }) %>
                             </td>
-                            <!-- Join มาเรียบร้อยแล้ว สามารถใช้ item_id, user_name ได้ -->
                             <td> <%= order.user_name %> </td>
                             <td>
                                 <div class="status-wrapper">
@@ -127,15 +126,14 @@
         </section>
     </main>
 
-    <!-- Overlay สำหรับโชว์รายการสินค้าทั้งหมด เพื่อสร้าง Order อีกที -->
+    
     <section class="modal-overlay" id="showInventoryModal">
         <div class="modal-box show-inventory-box">
             <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">รายการสินค้าทั้งหมดที่สามารถเพิ่มได้</h2>
-            <!-- <form id="orderForm" method="POST" action="/orders/add"> -->
+            
             <table>
                 <thead>
                     <tr>
-                        <!-- ตามใน Inventory เลย -->
                         <th>รายละเอียดสินค้า</th>
                         <th>รหัสสินค้า</th>
                         <th>จำนวน</th>
@@ -148,13 +146,11 @@
         </div>
     </section>
 
-    <!-- Overlay สำหรับการใส่ Quantity เพื่อสร้าง Order ของสินค้านั้น -->
     <section class="modal-overlay" id="addOrderModal">
         <div class="modal-box">
             <h2 id="modalProductName" style="margin-bottom: 5px; font-size: 20px;">รายการสินค้า</h2>
             <p>เลือกจำนวนที่สินค้าสำหรับออเดอร์</p>
             <form id="addOrderForm" method="POST">
-            <!-- action="/orders/add-orders/:id" เพิ่ม action ใน function-->
                 <img id="addOrderImg">
                 <h4 id="addOrderName"></h4>
                 <h4 id="addOrderQty"></h4>
@@ -171,7 +167,6 @@
         </div>
     </section>
 
-    <!-- หน้าสำหรับโชว์ Error หลังเกิดข้อผิดพลาดจากการสร้าง Order -->
     <section class="modal-overlay" id="errorModal">
         <div class="modal-box" id="errorBox">
             <h2 id="errMsgLabel" style="margin-bottom: 5px; font-size: 20px;">เกิดข้อผิดพลาด</h2>
@@ -187,9 +182,8 @@
             const response = await fetch('/orders/add-orders');
             const inventory = await response.json();
             const tableBody = document.getElementById("inventoryTableBody");
-            tableBody.innerHTML = ""; //เคลียร์ body ก่อน
+            tableBody.innerHTML = "";
             inventory.forEach((row) => {
-                //fallback (หลัง ||) ใช้ตอน src เป็น null, onerror ใช้ตอน src link เสีย
                     tableBody.innerHTML += `
                         <tr>
                             <td>
@@ -216,7 +210,7 @@
             const inventory = await response.json();
 
             document.getElementById("addMaxQuantity").max = inventory.quantity;
-            document.getElementById("addMaxQuantity").value = 0; //Reset default quantity
+            document.getElementById("addMaxQuantity").value = 0;
             document.getElementById("addOrderForm").action = `/orders/add-orders/${itemId}`;
             document.getElementById("addOrderImg").src = inventory.image;
             document.getElementById("addOrderName").innerHTML = inventory.name;
@@ -226,12 +220,12 @@
             openModal("addOrderModal");
         }
 
-        //Update status หลังจาก user กด dropdown แล้ว onchange มาเรียกใช้
+       
 async function updateStatus(orderId, status) {
 
     try {
 
-        const response = await fetch(`/orders/update-status/${orderId}`, { //fetch ไป ก็จะรอการตอบกลับเป็น json เพื่อ catch ทำงานได้
+        const response = await fetch(`/orders/update-status/${orderId}`, { 
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -265,7 +259,7 @@ async function updateStatus(orderId, status) {
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.style.display = 'flex';
-            modal.classList.add('active'); // เผื่อ style.css ต้องการ class นี้
+            modal.classList.add('active'); 
         }
 
         function closeModal(modalId) {

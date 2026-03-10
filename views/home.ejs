@@ -133,13 +133,13 @@
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
         <script>
-            // รับค่ามาจากเซิร์ฟเวอร์
+            
             const seriesData = <%- JSON.stringify(chartSeries) %>;
             const labelsData = <%- JSON.stringify(chartLabels) %>;
 
             var options = {
-                series: seriesData, // ใช้ข้อมูลจริงจาก Database
-                labels: labelsData, // ใส่ชื่อประเภทสินค้าให้แสดงใน Legend
+                series: seriesData, 
+                labels: labelsData, 
                 chart: {
                     type: 'polarArea',
                     height: 350
